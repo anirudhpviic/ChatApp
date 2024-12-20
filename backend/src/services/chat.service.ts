@@ -36,4 +36,15 @@ export class ChatService {
       return data;
     } catch (error) {}
   }
+
+  async allChats(userId: string) {
+    try {
+      const chats = await this.chatModel
+        .find({ participants: userId }) // Match userId in participants array
+        .select('_id groupName'); // Select only necessary fields (_id and groupName)
+
+      return chats;
+
+    } catch (error) {}
+  }
 }

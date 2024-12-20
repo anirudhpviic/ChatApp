@@ -4,6 +4,7 @@ import { ValidationPipe } from '@nestjs/common';
 import * as cookieParser from 'cookie-parser';
 import { AuthGuard } from './guards/auth.guard';
 import { JwtService } from '@nestjs/jwt';
+import { IoAdapter } from '@nestjs/platform-socket.io';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -20,6 +21,10 @@ async function bootstrap() {
 
   // Enable global validation
   app.useGlobalPipes(new ValidationPipe());
+
+  // Enable WebSocket
+  app.useWebSocketAdapter(new IoAdapter(app));
+
 
   // TODO:testing
   // const jwtService = app.get(JwtService);

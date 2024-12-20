@@ -22,10 +22,14 @@ import {
 } from "react-router-dom";
 import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
+import useSocket from "./hooks/useSocket";
 
 function App() {
   const user = useAppSelector((state) => state.user);
   const dispatch = useAppDispatch();
+
+  // TODO: calling socket
+  const socket = useSocket();
   // const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   const checkTokenExpiration = async () => {

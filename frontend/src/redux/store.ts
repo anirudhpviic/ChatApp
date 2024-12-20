@@ -35,23 +35,27 @@
 // export const persistor = persistStore(store);
 
 // src/store.ts
-import { configureStore, combineReducers } from '@reduxjs/toolkit';
-import { persistStore, persistReducer } from 'redux-persist';
-import storage from 'redux-persist/lib/storage'; // Defaults to localStorage for web
-import userReducer from './userSlice';
-import chatReducer from './chatSlice';
+import { configureStore, combineReducers } from "@reduxjs/toolkit";
+import { persistStore, persistReducer } from "redux-persist";
+import storage from "redux-persist/lib/storage"; // Defaults to localStorage for web
+import userReducer from "./userSlice";
+import chatReducer from "./chatSlice";
+import selectedChatReducer from "./selectedChat";
+import messageReducer from "./messageSlice";
 
 // Combine all reducers into a single root reducer
 const rootReducer = combineReducers({
   user: userReducer, // Add other reducers here if needed
-  chat: chatReducer
+  chat: chatReducer,
+  selectedChat: selectedChatReducer,
+  message: messageReducer,
 });
 
 // Persist configuration
 const persistConfig = {
-  key: 'root',
+  key: "root",
   storage,
-  whitelist: ['user', 'chat'], // Persist only the 'user' slice
+  whitelist: ["user", "chat", "selectedChat", "message"], // Persist only the 'user' slice
 };
 
 // Wrap the root reducer with persistReducer
@@ -63,7 +67,7 @@ export const store = configureStore({
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: {
-        ignoredActions: ['persist/PERSIST', 'persist/REHYDRATE'], // Ignore non-serializable actions
+        ignoredActions: ["persist/PERSIST", "persist/REHYDRATE"], // Ignore non-serializable actions
       },
     }),
 });

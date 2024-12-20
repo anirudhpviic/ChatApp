@@ -41,9 +41,17 @@ const chatSlice = createSlice({
 
     // Clear all chats
     clearChats: () => initialState,
-  },
+
+    setChats:(state,action)=>{
+        console.log("action.payload chec", action.payload);
+        return state = [...action.payload];
+
+        // state = action.payload
+    }
+
+},
 });
 
 // Export the actions and reducer
-export const { addChat, clearChats } = chatSlice.actions;
+export const { addChat, clearChats,setChats } = chatSlice.actions;
 export default chatSlice.reducer;

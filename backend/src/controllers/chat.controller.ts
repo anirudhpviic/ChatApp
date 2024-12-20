@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 import { ChatService } from 'src/services/chat.service';
 
 @Controller('chat')
@@ -18,5 +18,13 @@ export class ChatController {
     } catch (error) {
       console.log(error);
     }
+  }
+
+  @Get()
+  async getALlChats(@Query('userId') userId: string) {
+    console.log('uer:', userId);
+    const res = await this.chatService.allChats(userId);
+
+    return res;
   }
 }
