@@ -125,4 +125,13 @@ export class UserController {
       };
     } catch (error) {}
   }
+
+  @Get()
+  async getAllUsers() {
+    try {
+      const users = await this.userService.getAllUsers();
+      console.log(users);
+      return users;
+    } catch (error) {}
+  }
 }

@@ -25,7 +25,7 @@ export default function MessageList() {
                     <AvatarFallback>{message.sender.split(' ').map(n => n[0]).join('')}</AvatarFallback>
                   </Avatar>
                 )}
-                <div className={`bg-gray-100 p-3 rounded-lg ${message.sender === 'You' ? 'bg-blue-500 text-white' : ''}`}>
+                <div className={`p-3 rounded-lg  ${message.sender === 'You' ? 'bg-blue-500 text-white' : ''}`}>
                   <p className="font-medium">{message.sender}</p>
                   <p>{message.content}</p>
                   <p className="text-xs text-gray-500 mt-1">{message.timestamp}</p>

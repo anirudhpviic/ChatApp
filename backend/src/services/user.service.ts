@@ -4,6 +4,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import * as bcrypt from 'bcrypt';
 import { User } from 'src/schemas/user.schema';
 import { Model } from 'mongoose';
+import { create } from 'domain';
 
 @Injectable()
 export class UserService {
@@ -56,6 +57,27 @@ export class UserService {
     ]);
 
     return { user: safeUser[0], accessToken, refreshToken };
+  }
+
+  async getAllUsers() {
+    try {
+      const safeUsers = await this.userModel.aggregate([
+        {
+          $project: {
+            // Exclude sensitive fields
+            // password: 0,
+            _id: 1,
+            username: 1,
+
+            // refreshToken: 0,
+          },
+        },
+      ]);
+      return safeUsers;
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      throw new Error('Failed to fetch users');
+    }
   }
 
   async refresh(refreshToken: string) {

@@ -39,17 +39,19 @@ import { configureStore, combineReducers } from '@reduxjs/toolkit';
 import { persistStore, persistReducer } from 'redux-persist';
 import storage from 'redux-persist/lib/storage'; // Defaults to localStorage for web
 import userReducer from './userSlice';
+import chatReducer from './chatSlice';
 
 // Combine all reducers into a single root reducer
 const rootReducer = combineReducers({
   user: userReducer, // Add other reducers here if needed
+  chat: chatReducer
 });
 
 // Persist configuration
 const persistConfig = {
   key: 'root',
   storage,
-  whitelist: ['user'], // Persist only the 'user' slice
+  whitelist: ['user', 'chat'], // Persist only the 'user' slice
 };
 
 // Wrap the root reducer with persistReducer
