@@ -1,4 +1,4 @@
-import { NestFactory } from '@nestjs/core';
+import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import * as cookieParser from 'cookie-parser';
@@ -25,12 +25,17 @@ async function bootstrap() {
   // Enable WebSocket
   app.useWebSocketAdapter(new IoAdapter(app));
 
-
-  // TODO:testing
+  // // TODO:testing
   // const jwtService = app.get(JwtService);
-  // Apply the AuthGuard globally
+  // // Apply the AuthGuard globally
   // app.useGlobalGuards(new AuthGuard(jwtService));
-  // TODO: end
+  // // TODO: end
+
+  const reflector = app.get(Reflector);
+  const jwtService = app.get(JwtService);
+
+  // Apply AuthGuard globally
+  app.useGlobalGuards(new AuthGuard(jwtService, reflector));
 
   await app.listen(process.env.PORT ?? 3000);
 }

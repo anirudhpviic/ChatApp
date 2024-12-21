@@ -3,10 +3,9 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { DatabaseModule } from './modules/mongodb.module';
 import { ConfigModule } from '@nestjs/config';
-import { UserModule } from './modules/user.module';
+import { AuthModule } from './modules/auth.module';
 import { ChatModule } from './modules/chat.module';
 import { SocketModule } from './modules/socket.module';
-import { MessageService } from './services/message.service';
 
 @Module({
   imports: [
@@ -14,7 +13,7 @@ import { MessageService } from './services/message.service';
       isGlobal: true,
     }),
     DatabaseModule,
-    UserModule,
+    AuthModule,
     ChatModule,
     SocketModule,
   ],

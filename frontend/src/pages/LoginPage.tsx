@@ -6,7 +6,6 @@ import {
   Card,
   CardHeader,
   CardTitle,
-  CardDescription,
   CardContent,
   CardFooter,
 } from "@/components/ui/card";
@@ -31,14 +30,15 @@ export default function LoginPage() {
 
     try {
       const res = await login({ username, password });
-      console.log("res:", res);
 
-      setIsPending(false);
       dispatch(setUser(res.data));
+      navigate("/"); 
     } catch (error: any) {
       console.error(error);
       setError("Something went wrong");
     }
+
+    setIsPending(false);
   };
 
   return (
@@ -73,7 +73,7 @@ export default function LoginPage() {
             </div>
             {error && <p className="text-red-500 text-sm">{error}</p>}
             <Button type="submit" className="w-full" disabled={isPending}>
-              {isPending ? "Logging In..." : "Sign Up"}
+              {isPending ? "Logging In..." : "Login"}
             </Button>
           </form>
         </CardContent>

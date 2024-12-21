@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { DatabaseService } from '../services/mongodb.service';
-import { UserModule } from './user.module';
+import { AuthModule } from './auth.module';
 import { ChatModule } from './chat.module';
 
 @Module({
@@ -9,7 +9,7 @@ import { ChatModule } from './chat.module';
     MongooseModule.forRootAsync({
       useClass: DatabaseService, // Custom config via DatabaseService
     }),
-    UserModule,
+    AuthModule,
     ChatModule,
   ],
   providers: [DatabaseService],

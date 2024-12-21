@@ -8,7 +8,7 @@ const signup = async ({
   password: string;
 }) => {
   return await axios.post(
-    "http://localhost:3000/users/signup",
+    "http://localhost:3000/auth/signup",
     { username, password },
     { withCredentials: true }
   );
@@ -22,7 +22,7 @@ const login = async ({
   password: string;
 }) => {
   return await axios.post(
-    "http://localhost:3000/users/login",
+    "http://localhost:3000/auth/login",
     {
       username,
       password,
@@ -39,7 +39,7 @@ const logout = async () => {
 
 const refreshToken = async (refreshToken: string) => {
   return await axios.post(
-    "http://localhost:3000/users/refresh-token",
+    "http://localhost:3000/auth/refresh-token",
     {refreshToken},
     {
       withCredentials: true,

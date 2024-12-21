@@ -1,25 +1,9 @@
-// import React from "react";
-// import {
-//   BrowserRouter as Router,
-//   Route,
-//   Routes,
-//   Navigate,
-// } from "react-router-dom";
-// import Signup from "./pages/signupPage";
-// import Login from "./pages/loginPage";
-// import Home from "./pages/homePage";
-// import { useCookies } from "react-cookie";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "./hooks/useRedux";
 import SignUpPage from "./pages/Signup";
 import { refreshToken } from "./api/auth";
 import { updateUserTokens } from "./redux/userSlice";
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Navigate,
-} from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
 import useSocket from "./hooks/useSocket";
@@ -30,7 +14,6 @@ function App() {
 
   // TODO: calling socket
   const socket = useSocket();
-  // const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   const checkTokenExpiration = async () => {
     if (user.accessToken) {
@@ -51,14 +34,13 @@ function App() {
                 refreshToken: res.data.refreshToken,
               })
             );
-            // setIsAuthenticated(true);
             return true;
           } catch (error) {
+            console.error(error);
             // TODO: navigate to login
+            throw error;
           }
         }
-
-        // setIsAuthenticated(true);
 
         return true;
       }
@@ -71,36 +53,16 @@ function App() {
     return () => clearInterval(intervalId);
   }, []);
 
-  // return <SignUpPage />;
-
   return (
     <Router>
       <Routes>
         {/* Public Route: Login */}
-        <Route
-          path="/login"
-          // element={
-          //   !isAuthenticated ? <LoginPage /> : <Navigate to="/" replace />
-          // }
-          element={<LoginPage />}
-        />
+        <Route path="/login" element={<LoginPage />} />
 
-        <Route
-          path="/signup"
-          // element={
-          //   !isAuthenticated ? <SignUpPage /> : <Navigate to="/" replace />
-          // }
-          element={<SignUpPage />}
-        />
+        <Route path="/signup" element={<SignUpPage />} />
 
         {/* Protected Route: Home */}
-        <Route
-          path="/"
-          // element={
-          //   isAuthenticated ? <HomePage /> : <Navigate to="/login" replace />
-          // }
-          element={<HomePage />}
-        />
+        <Route path="/" element={<HomePage />} />
       </Routes>
     </Router>
   );

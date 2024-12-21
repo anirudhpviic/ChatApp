@@ -31,14 +31,14 @@ export default function SignUpPage() {
 
     try {
       const res = await signup({ username, password });
-      console.log("res:", res);
-      setIsPending(false);
-
       dispatch(setUser(res.data.user));
+      navigate("/");
     } catch (error: any) {
       console.error(error);
       setError("Something went wrong");
     }
+
+    setIsPending(false);
   };
 
   return (

@@ -40,7 +40,7 @@ export default function UserList() {
     <div className="p-4">
       <h2 className="text-xl font-bold mb-4">chats</h2>
       <ul className="space-y-2">
-        {chats.map((chat) => (
+        {chats.map((chat) => ( 
           <li
             key={chat._id}
             onClick={() => dispatch(setSelectedChat(chat))}
