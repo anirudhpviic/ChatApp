@@ -21,6 +21,7 @@ export class AuthService {
       user.refreshToken = refreshToken;
       await user.save();
 
+      // TODO: change aggregation to normal find
       const safeUser = await this.userModel.aggregate([
         { $match: { username } },
         {
@@ -48,8 +49,10 @@ export class AuthService {
 
       const { accessToken, refreshToken } = this.generateTokens(user);
       user.refreshToken = refreshToken;
-      await user.save();
+      // await user.save();
 
+      // TODO: change to normal find
+      // TODO: remove unwanted queries
       const safeUser = await this.userModel.aggregate([
         { $match: { username } },
         {

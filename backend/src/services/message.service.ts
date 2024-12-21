@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Message } from 'src/schemas/message.schema';
 import { Model, Types } from 'mongoose';
@@ -36,5 +36,27 @@ export class MessageService {
     // .exec();
 
     return messages;
+  }
+
+  async updateMessageStatus({
+    messageId,
+    groupId,
+    status,
+  }: {
+    messageId: string;
+    groupId: string;
+    status: string;
+  }) {
+    const updatedMessage = await this.messageModel.findOneAndUpdate(
+      { _id: messageId, groupId }, // Filter criteria
+      { status }, // Update fields
+      { new: true }, // Return the updated document
+    );
+
+    if (!updatedMessage) {
+      throw new NotFoundException('Message not found or group mismatch');
+    }
+
+    return updatedMessage;
   }
 }

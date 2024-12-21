@@ -1,4 +1,3 @@
-import { Req } from '@nestjs/common';
 import {
   WebSocketGateway,
   WebSocketServer,
@@ -6,7 +5,6 @@ import {
   OnGatewayDisconnect,
   SubscribeMessage,
   MessageBody,
-  ConnectedSocket,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { MessageService } from 'src/services/message.service';
@@ -75,7 +73,6 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('sendMessage')
   async handleMessage(
     @MessageBody() data: { groupId: string; message: string; senderId: string },
-    @ConnectedSocket() socket: Socket,
   ) {
     // Save the message to the database
     const savedMessage = await this.messageService.createMessage({
@@ -84,10 +81,44 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
       groupId: data.groupId,
     });
 
-    console.log("new message:",savedMessage);
+    console.log('new message:', savedMessage);
 
     // Broadcast to the specific group room
     this.server.to(data.groupId).emit('receiveMessage', savedMessage);
+  }
+
+  @SubscribeMessage('messageSeen')
+  async handleMessageSeen(
+    @MessageBody() data: { groupId: string; messageId: string },
+  ) {
+    // Save the message to the database
+    const updatedMessage = await this.messageService.updateMessageStatus({
+      messageId: data.messageId,
+      groupId: data.groupId,
+      status: 'seen',
+    });
+
+    console.log('updated message:', updatedMessage);
+
+    // Broadcast to the specific group room
+    this.server.to(data.groupId).emit('messageSeenByUser', updatedMessage);
+  }
+
+  @SubscribeMessage('messageDelivered')
+  async handleMessageDelivered(
+    @MessageBody() data: { groupId: string; messageId: string },
+  ) {
+    // Save the message to the database
+    const updatedMessage = await this.messageService.updateMessageStatus({
+      messageId: data.messageId,
+      groupId: data.groupId,
+      status: 'delivered',
+    });
+
+    console.log('updated message:', updatedMessage);
+
+    // Broadcast to the specific group room
+    this.server.to(data.groupId).emit('messageDeliveredByUser', updatedMessage);
   }
 
   // Mock function to get user groups
