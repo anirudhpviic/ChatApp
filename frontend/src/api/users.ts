@@ -1,11 +1,7 @@
-import axios from "axios";
+import { apiClient } from "./config";
 
 const getAllUsers = async () => {
-  return await axios.get(
-    "http://localhost:3000/users",
-
-    { withCredentials: true }
-  );
+  return await apiClient.get("/user");
 };
 
 export { getAllUsers };

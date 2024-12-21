@@ -13,45 +13,47 @@ function App() {
   const dispatch = useAppDispatch();
 
   // TODO: calling socket
-  const socket = useSocket();
+  // useSocket();
 
-  const checkTokenExpiration = async () => {
-    if (user.accessToken) {
-      const token = user.accessToken.split(" ")[1];
-      if (token) {
-        const decodedToken = JSON.parse(atob(token.split(".")[1]));
-        const expirationTime = decodedToken.exp;
-        const currentTime = Math.floor(Date.now() / 1000);
-        if (expirationTime < currentTime) {
-          // TODO: tokoen expired logic
-          // setIsAuthenticated(false);
+  // const checkTokenExpiration = async () => {
+  //   if (user.accessToken) {
+  //     const token = user.accessToken.split(" ")[1];
+  //     if (token) {
+  //       const decodedToken = JSON.parse(atob(token.split(".")[1]));
+  //       const expirationTime = decodedToken.exp;
+  //       const currentTime = Math.floor(Date.now() / 1000);
+  //       if (expirationTime < currentTime) {
+  //         // TODO: tokoen expired logic
+  //         // setIsAuthenticated(false);
 
-          try {
-            const res = await refreshToken(user.refreshToken);
-            dispatch(
-              updateUserTokens({
-                accessToken: res.data.accessToken,
-                refreshToken: res.data.refreshToken,
-              })
-            );
-            return true;
-          } catch (error) {
-            console.error(error);
-            // TODO: navigate to login
-            throw error;
-          }
-        }
+  //         try {
+  //           const res = await refreshToken(user.refreshToken);
+  //           dispatch(
+  //             updateUserTokens({
+  //               accessToken: res.data.accessToken,
+  //               refreshToken: res.data.refreshToken,
+  //             })
+  //           );
+  //           return true;
+  //         } catch (error) {
+  //           console.error(error);
+  //           // TODO: navigate to login
+  //           throw error;
+  //         }
+  //       }
 
-        return true;
-      }
-    }
-  };
+  //       return true;
+  //     }
+  //   }
 
-  useEffect(() => {
-    const intervalId = setInterval(checkTokenExpiration, 50000);
+  //   throw new Error("Token not found");
+  // };
 
-    return () => clearInterval(intervalId);
-  }, []);
+  // useEffect(() => {
+  //   const intervalId = setInterval(checkTokenExpiration, 20000);
+
+  //   return () => clearInterval(intervalId);
+  // }, []);
 
   return (
     <Router>

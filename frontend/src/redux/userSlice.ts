@@ -40,10 +40,11 @@ const userSlice = createSlice({
       state,
       action: PayloadAction<{ accessToken: string; refreshToken: string }>
     ) => {
-      const { accessToken, refreshToken } = action.payload;
-
-      state.accessToken = accessToken;
-      state.refreshToken = refreshToken;
+      state = {
+        ...state,
+        accessToken: action.payload.accessToken,
+        refreshToken: action.payload.refreshToken,
+      };
     },
     clearUser: () => initialState, // Resets to initial state
   },

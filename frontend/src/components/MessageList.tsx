@@ -1,10 +1,13 @@
+import { apiClient } from "@/api/config";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useAppSelector } from "@/hooks/useRedux";
+import { useSocketContext } from "@/context/SocketContext";
+import { useAppDispatch, useAppSelector } from "@/hooks/useRedux";
 import useSocket from "@/hooks/useSocket";
+import { addMessage, setMessages } from "@/redux/messageSlice";
 import { Send } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 // const messages = [
 //   {
@@ -34,28 +37,83 @@ import { useState } from "react";
 // ];
 
 export default function MessageList() {
-  const socket = useSocket();
+  // const socket = useSocket();
+  const { socket } = useSocketContext();
+
   const [message, setMessage] = useState("");
 
   const selectedChat = useAppSelector((state) => state.selectedChat);
   const messages = useAppSelector((state) => state.message);
   const user = useAppSelector((state) => state.user);
 
+  const dispatch = useAppDispatch();
+
+  useEffect(() => {
+    if (!socket) return;
+
+    socket.on("receiveMessage", (message) => {
+      console.log("Message received:", message);
+      dispatch(addMessage(message));
+      // setMessages((prev) => [...prev, message]);
+    });
+
+    return () => {
+      socket.off("receiveMessage");
+    };
+  }, [socket, dispatch]);
+
   const sendMessage = (e) => {
     e.preventDefault();
     if (socket) {
-      socket.emit("sendMessage", { groupId:selectedChat._id, message });
+      socket.emit("sendMessage", {
+        groupId: selectedChat._id,
+        message,
+        senderId: user._id,
+      });
       setMessage(""); // Clear input
     }
   };
 
-  if (selectedChat.isSelected === false) return;
+  const fetchAllMessages = async () => {
+    const response = await apiClient.get("/message", {
+      params: { groupId: selectedChat._id },
+    });
+
+    dispatch(setMessages(response.data));
+    console.log("data", response.data);
+  };
+
+  useEffect(() => {
+    fetchAllMessages();
+  }, [selectedChat]);
+
+  // if (selectedChat.isSelected === false) return;
+
+  const getUsername = (senderId) => {
+    console.log("senderId", senderId);
+    console.log("selectedChat", selectedChat);
+    const oppositeUser = selectedChat.participants.find(
+      (p) => p._id === senderId
+    );
+    return oppositeUser?.username || "oppo";
+    // return "d"
+  };
+
+  const getOppositeUserOne = () => {
+    const oppositeUser = selectedChat.participants.find(
+      (p) => p._id !== user._id
+    );
+    return oppositeUser?.username || "oppo";
+  };
 
   return (
     <div className="flex flex-col h-full">
       <div className="flex-1 overflow-y-auto p-4">
         <h2 className="text-xl font-bold mb-4">
-          Messages - {selectedChat?.groupName}
+          Messages -{" "}
+          {selectedChat.type === "group"
+            ? selectedChat.groupName
+            : getOppositeUserOne()}
         </h2>
         <ul className="space-y-4">
           {messages.map((message) => (
@@ -83,17 +141,21 @@ export default function MessageList() {
                         .split(" ")
                         .map((n) => n[0])
                         .join("")} */}
-                        S
+                      {getUsername(message.sender)}
                     </AvatarFallback>
                   </Avatar>
                 )}
                 <div
                   className={`p-3 rounded-lg  ${
-                    message.sender === "You" ? "bg-blue-500 text-white" : ""
+                    message.sender === user._id ? "bg-blue-500 text-white" : ""
                   }`}
                 >
-                  <p className="font-medium">{message.sender}</p>
-                  <p>{message.content}</p>
+                  <p className="font-medium">
+                    {message.sender === user._id
+                      ? "You"
+                      : getUsername(message.sender)}
+                  </p>
+                  <p>{message.message}</p>
                   <p className="text-xs text-gray-500 mt-1">
                     {/* {message.timestamp} */}
                   </p>

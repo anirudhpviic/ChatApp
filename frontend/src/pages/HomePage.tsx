@@ -1,4 +1,4 @@
-import CreateGroup from "@/components/CreateGroup";
+import CreatePage from "@/components/CreateChat";
 import MessageList from "@/components/MessageList";
 import { Button } from "@/components/ui/button";
 import UserList from "@/components/UserList";
@@ -36,7 +36,7 @@ const HomePage = () => {
       <div className="flex-1">
         <MessageList />
       </div>
-      {isOpen && <CreateGroup isOpen={isOpen} setIsOpen={setIsOpen} />}{" "}
+      {isOpen && <CreatePage isOpen={isOpen} setIsOpen={setIsOpen} />}{" "}
     </div>
   );
 };

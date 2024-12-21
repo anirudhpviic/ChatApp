@@ -1,11 +1,7 @@
-import axios from "axios";
+import { apiClient } from "./config";
 
 const createGroupChat = async (data) => {
-  return await axios.post(
-    "http://localhost:3000/chat/create-group",
-    {data},
-    { withCredentials: true }
-  );
+  return await apiClient.post("/chat/create", { data });
 };
 
 export { createGroupChat };

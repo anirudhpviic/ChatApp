@@ -1,13 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { User } from 'src/schemas/user.schema';
 import { Model } from 'mongoose';
-import { GroupChat } from 'src/schemas/chat.schema';
+import { Chat } from 'src/schemas/chat.schema';
 
 @Injectable()
 export class SocketService {
   constructor(
-    @InjectModel(GroupChat.name) private readonly chatModel: Model<GroupChat>,
+    @InjectModel(Chat.name) private readonly chatModel: Model<Chat>,
   ) {}
 
   async getUserGroups(userId: string) {

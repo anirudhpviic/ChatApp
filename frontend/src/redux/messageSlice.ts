@@ -8,7 +8,7 @@ interface Message {
   createdAt: string;
   _id: string;
   sender: string;
-  content: string;
+  message: string;
   groupId: string;
   status: string;
 }
@@ -18,13 +18,18 @@ const initialState: Message[] = []; // Directly store an array of chats
 
 // Create a Redux slice
 const messageSlice = createSlice({
-  name: "chat",
+  name: "message",
   initialState,
   reducers: {
     // Add a new chat to the array
-    addMessage: (state, action: PayloadAction<Message>) => {
+    addMessage: (state, action) => {
       console.log("action.payload", action.payload);
-      state.push(action.payload);
+      // state =   [...state, action.payload];
+       state.push(action.payload); // Correctly updates state
+    },
+
+    setMessages: (state, action) => {
+      return state = [...action.payload];
     },
 
     // Update an existing chat by groupName
@@ -43,5 +48,5 @@ const messageSlice = createSlice({
 });
 
 // Export the actions and reducer
-export const { addMessage, clearMessages } = messageSlice.actions;
+export const { addMessage, clearMessages,setMessages } = messageSlice.actions;
 export default messageSlice.reducer;

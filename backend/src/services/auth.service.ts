@@ -67,27 +67,6 @@ export class AuthService {
     }
   }
 
-  async getAllUsers() {
-    try {
-      const safeUsers = await this.userModel.aggregate([
-        {
-          $project: {
-            // Exclude sensitive fields
-            // password: 0,
-            _id: 1,
-            username: 1,
-
-            // refreshToken: 0,
-          },
-        },
-      ]);
-      return safeUsers;
-    } catch (error) {
-      console.error('Error fetching users:', error);
-      throw new Error('Failed to fetch users');
-    }
-  }
-
   async refresh(refreshToken: string) {
     try {
       const user = await this.userModel.findOne({ refreshToken });

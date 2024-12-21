@@ -28,7 +28,7 @@ const useSocket = () => {
     return () => {
       newSocket.disconnect(); // Cleanup on unmount
     };
-  }, [userId]);
+  }, [dispatch, userId]);
 
   return socket;
 };

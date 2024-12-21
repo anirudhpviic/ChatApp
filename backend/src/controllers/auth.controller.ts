@@ -66,13 +66,4 @@ export class AuthController {
       console.error(error);
     }
   }
-
-  @Get()
-  async getAllUsers() {
-    try {
-      const users = await this.authService.getAllUsers();
-      console.log(users);
-      return users;
-    } catch (error) {}
-  }
 }

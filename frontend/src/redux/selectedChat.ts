@@ -31,12 +31,14 @@ const userSlice = createSlice({
   reducers: {
     setSelectedChat: (state, action: PayloadAction<SelectedChatState>) => {
       console.log("action.payload", action.payload);
-      const { groupName, participants, createdAt, _id } = action.payload;
-      state.isSelected = true;
-      state.groupName = groupName;
-      state.participants = participants;
-      state.createdAt = createdAt;
-      state._id = _id;
+      // const { groupName, participants, createdAt, _id } = action.payload;
+      // state.isSelected = true;
+      // state.groupName = groupName;
+      // state.participants = participants;
+      // state.createdAt = createdAt;
+      // state._id = _id;
+
+      return (state = { ...action.payload });
     },
 
     clearSelectedChat: () => initialState, // Resets to initial state

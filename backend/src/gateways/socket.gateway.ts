@@ -1,3 +1,4 @@
+import { Req } from '@nestjs/common';
 import {
   WebSocketGateway,
   WebSocketServer,
@@ -73,18 +74,17 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @SubscribeMessage('sendMessage')
   async handleMessage(
-    @MessageBody() data: { groupId: string; message: string },
+    @MessageBody() data: { groupId: string; message: string; senderId: string },
     @ConnectedSocket() socket: Socket,
   ) {
-    console.log('Received message:', data);
-
     // Save the message to the database
     const savedMessage = await this.messageService.createMessage({
-      groupName: data.groupId,
-      sender: socket.id,
-      content: data.message,
+      sender: data.senderId,
+      message: data.message,
       groupId: data.groupId,
     });
+
+    console.log("new message:",savedMessage);
 
     // Broadcast to the specific group room
     this.server.to(data.groupId).emit('receiveMessage', savedMessage);

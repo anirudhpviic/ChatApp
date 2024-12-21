@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Message } from 'src/schemas/message.schema';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 
 @Injectable()
 export class MessageService {
@@ -10,23 +10,31 @@ export class MessageService {
   ) {}
 
   async createMessage({
-    groupName,
     sender,
-    content,
+    message,
     groupId,
   }: {
-    groupName: string;
     sender: string;
-    content: string;
+    message: string;
     groupId: string;
   }) {
-    const message = new this.messageModel({
-      groupName,
+    const newMessage = new this.messageModel({
       sender,
-      content,
+      message,
       groupId,
+      status: 'send',
     });
-    await message.save();
-    return message;
+    await newMessage.save();
+    return newMessage;
+  }
+
+  async getAllMessages(groupId) {
+    // const messages = await this.messageModel.find({groupId});
+    // console.log(messages);
+    const messages = await this.messageModel.find({ groupId });
+    // .sort({ createdAt: 1 });
+    // .exec();
+
+    return messages;
   }
 }

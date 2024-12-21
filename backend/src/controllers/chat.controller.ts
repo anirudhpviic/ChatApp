@@ -5,18 +5,19 @@ import { ChatService } from 'src/services/chat.service';
 export class ChatController {
   constructor(private readonly chatService: ChatService) {}
 
-  @Post('create-group')
-  async createGroupChat(@Body() body) {
+  @Post('create')
+  async createChat(@Body() body) {
     // TODO: user creating user id not there add later
     // console.log(body)
     // console.log('kere');
 
     try {
-      return await this.chatService.createGroupChat(body.data);
+      return await this.chatService.createChat(body.data);
       // console.log(res);
       // return groupchat;
     } catch (error) {
       console.log(error);
+      throw error;
     }
   }
 
