@@ -1,3 +1,5 @@
+import { UploadedFile, UseInterceptors } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import {
   WebSocketGateway,
   WebSocketServer,
@@ -7,8 +9,15 @@ import {
   MessageBody,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
+import { multerConfig } from 'src/config/multer.config';
 import { MessageService } from 'src/services/message.service';
 import { SocketService } from 'src/services/socket.service';
+import { Multer } from 'multer';
+import { join } from 'path';
+import { writeFile, writeFileSync } from 'fs';
+import { Readable } from 'stream';
+import { v2 as cloudinary } from 'cloudinary';
+import { CloudinaryService } from 'src/services/cloudinary.service';
 
 @WebSocketGateway({
   cors: { origin: '*' }, // Allow all origins for simplicity
@@ -17,6 +26,7 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
   constructor(
     private readonly socketService: SocketService,
     private readonly messageService: MessageService,
+    private cloudinaryService: CloudinaryService,
   ) {}
 
   @WebSocketServer() server: Server;
@@ -60,6 +70,50 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     // Broadcast to the specific group room
     this.server.to(data.groupId).emit('receiveMessage', savedMessage);
+  }
+
+  // Handle file upload event
+  // @SubscribeMessage('sendFile')
+  // async handleFileUpload(@MessageBody() data) {
+  //   try {
+  //     console.log(data);
+
+  //     const { fileName, fileData } = data;
+
+  //     const filePath = join(__dirname, '..', 'uploads', fileName); // Save to "uploads" directory
+  //     // await writeFile(filePath, fileData); // Write the buffer to a file
+  //     await writeFile(filePath, fileData, { encoding: 'utf8' });
+  //     console.log(`File saved at: ${filePath}`);
+  //   } catch (error) {
+  //     console.error('File upload failed:', error);
+  //     this.server.emit('fileUploaded', {
+  //       success: false,
+  //       error: error.message,
+  //     });
+  //   }
+  // }
+
+  // Handle file upload event
+  @SubscribeMessage('sendFile')
+  async handleFileUpload(@MessageBody() data) {
+    const { fileName, fileData } = data;
+
+    try {
+      // const uploadResult: any = await this.cloudinaryService.uploadFile(
+      //   fileData,
+      //   fileName,
+      // );
+      // console.log('upload:', uploadResult.data);
+      // console.log('url', uploadResult);
+
+      const uploadResult = await this.cloudinaryService.uploadFile(
+        fileData,
+        fileName,
+      );
+      console.log('Uploaded File URL:', uploadResult);
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   @SubscribeMessage('messageSeen')

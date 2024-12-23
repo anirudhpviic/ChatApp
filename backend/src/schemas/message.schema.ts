@@ -9,6 +9,17 @@ export class Message extends Document {
   @Prop()
   message: string;
 
+  @Prop({
+    type: {
+      url: { type: String, required: false },
+      type: { type: String, required: false },
+    },
+  })
+  attachment?: {
+    url: string;
+    type: string;
+  };
+
   @Prop({ default: Date.now })
   createdAt: Date;
 

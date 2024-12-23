@@ -6,6 +6,7 @@ import { UserSchema } from 'src/schemas/user.schema';
 import { AuthService } from 'src/services/auth.service';
 import { UserModule } from './user.module';
 import { MessageModule } from './message.module';
+import { CloudinaryModule } from './cloudinary.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { MessageModule } from './message.module';
     }),
     UserModule,
     MessageModule,
+    CloudinaryModule,
   ],
   controllers: [AuthController],
   providers: [AuthService],
