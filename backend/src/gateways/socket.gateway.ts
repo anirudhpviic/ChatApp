@@ -24,6 +24,8 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
   async handleConnection(socket: Socket) {
     console.log(`Client connected: ${socket.id}`);
 
+    this.socketService.setServer(this.server);
+
     const userId = socket.handshake.query.userId as string;
 
     // Fetch groups for the user (mocked or from DB)

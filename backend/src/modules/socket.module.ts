@@ -13,5 +13,6 @@ import { MessageService } from 'src/services/message.service';
   ],
 
   providers: [SocketGateway, SocketService, MessageService],
+  exports: [SocketService],
 })
 export class SocketModule {}
