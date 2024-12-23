@@ -26,7 +26,7 @@ export default function CreateChat({ isOpen, setIsOpen }) {
     const fetchUsers = async () => {
       try {
         const res = await getAllUsers();
-        setUsers(res.data);
+        setUsers(res.data)
       } catch (err) {
         console.error("Error fetching users:", err);
         setError("Failed to fetch users. Please try again.");

@@ -3,12 +3,14 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Chat } from 'src/schemas/chat.schema';
 import { User } from 'src/schemas/user.schema';
+import { SocketService } from './socket.service';
 
 @Injectable()
 export class ChatService {
   constructor(
     @InjectModel(Chat.name) private readonly chatModel: Model<Chat>,
     @InjectModel(User.name) private readonly userModel: Model<User>,
+    private readonly socketService: SocketService,
   ) {}
 
   async createChat({

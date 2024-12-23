@@ -34,7 +34,7 @@ export class MessageService {
     return newMessage;
   }
 
-  async getAllMessages(groupId,userId) {
+  async getAllMessages(groupId, userId) {
     // const messages = await this.messageModel.find({groupId});
     // console.log(messages);
     const messages = await this.messageModel.find({ groupId });
@@ -44,6 +44,8 @@ export class MessageService {
     const chat = await this.chatModel.findById(groupId);
 
     const server = this.socketService.getServer();
+
+    console.log("messages groupId", groupId);
 
     if (chat.type === 'one-to-one') {
       // If the chat is one-to-one and the current user is not the sender, update status to "seen"
