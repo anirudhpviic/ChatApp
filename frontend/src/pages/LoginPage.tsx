@@ -23,13 +23,19 @@ export default function LoginPage() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
-  const handleUsernameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setUsername(e.target.value);
-  }, []);
+  const handleUsernameChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setUsername(e.target.value);
+    },
+    []
+  );
 
-  const handlePasswordChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setPassword(e.target.value);
-  }, []);
+  const handlePasswordChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setPassword(e.target.value);
+    },
+    []
+  );
 
   const handleSubmit = useCallback(
     async (event: React.FormEvent<HTMLFormElement>) => {
@@ -40,9 +46,17 @@ export default function LoginPage() {
       try {
         const res = await login({ username, password });
 
-        dispatch(setUser(res.data));
-        navigate("/");
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        dispatch(setUser(res.data.user));
+        // if(res.data.role === "admin") navigate("/admin");
+        // navigate("/");
+
+        if (res.data.user.role === "admin") {
+          navigate("/admin");
+        } else {
+          navigate("/");
+        }
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (error: any) {
         console.error(error);
         setError(error?.response?.data?.message || "Something went wrong");
@@ -53,11 +67,10 @@ export default function LoginPage() {
     [username, password, dispatch, navigate]
   );
 
-  const isButtonDisabled = useMemo(() => isPending || !username || !password, [
-    isPending,
-    username,
-    password,
-  ]);
+  const isButtonDisabled = useMemo(
+    () => isPending || !username || !password,
+    [isPending, username, password]
+  );
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
@@ -90,7 +103,11 @@ export default function LoginPage() {
               />
             </div>
             {error && <p className="text-red-500 text-sm">{error}</p>}
-            <Button type="submit" className="w-full" disabled={isButtonDisabled}>
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={isButtonDisabled}
+            >
               {isPending ? "Logging In..." : "Login"}
             </Button>
           </form>

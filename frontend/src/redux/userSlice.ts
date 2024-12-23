@@ -7,6 +7,7 @@ interface UserState {
   accessToken: string;
   refreshToken: string;
   createdAt: string;
+  role: string;
 }
 
 // Initial state for the user
@@ -16,6 +17,7 @@ const initialState: UserState = {
   accessToken: "",
   refreshToken: "",
   createdAt: "",
+  role: "",
 };
 
 // Create a Redux slice

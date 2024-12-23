@@ -17,6 +17,7 @@ import { clearUser, updateUserTokens } from "./redux/userSlice";
 import { clearChats } from "./redux/chatSlice";
 import { clearMessages } from "./redux/messageSlice";
 import { clearSelectedChat } from "./redux/selectedChat";
+import AdminPage from "./pages/AdminPage";
 
 // Utility to decode token and check expiration
 const isTokenExpired = (token: string): boolean => {
@@ -34,7 +35,9 @@ function App() {
   useGetRealTimeChat();
   useGetRealTimeMessages();
 
-  const { accessToken, refreshToken } = useAppSelector((state) => state.user);
+  const { accessToken, refreshToken, role } = useAppSelector(
+    (state) => state.user
+  );
 
   const dispatch = useAppDispatch();
 
@@ -89,8 +92,11 @@ function App() {
     <Router>
       <Routes>
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/signup" element={<SignUpPage />} />
+        <Route path="/signup" element={<SignUpPage role="user" />} />
         <Route path="/" element={<HomePage />} />
+        <Route path="/admin" element={<AdminPage />} />
+        <Route path="/admin/signup" element={<SignUpPage role="admin" />} />
+        <Route path="/admin/login" element={<LoginPage />} />
       </Routes>
     </Router>
   );

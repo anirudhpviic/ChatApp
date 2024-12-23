@@ -12,7 +12,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async signup(username: string, password: string) {
+  async signup(username: string, password: string, role: string) {
     // Check if username already exists
     try {
       const existingUser = await this.userModel.findOne({ username }).exec();
@@ -27,6 +27,7 @@ export class AuthService {
       const user = await this.userModel.create({
         username,
         password: hashedPassword,
+        role,
       });
 
       const tokens = this.generateTokens(user);
@@ -91,7 +92,7 @@ export class AuthService {
     accessToken: string;
     refreshToken: string;
   } {
-    const payload = { username: user.username, _id: user._id };
+    const payload = { username: user.username, _id: user._id, role: user.role };
 
     const accessToken = this.jwtService.sign(payload, {
       secret: process.env.JWT_ACCESS_SECRET,

@@ -10,6 +10,9 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { CloudinaryService } from './services/cloudinary.service';
 import { CloudinaryModule } from './modules/cloudinary.module';
+import { AdminController } from './controllers/admin.controller';
+import { AdminService } from './services/admin.service';
+import { AdminModule } from './modules/admin.module';
 
 @Module({
   imports: [
@@ -23,6 +26,7 @@ import { CloudinaryModule } from './modules/cloudinary.module';
     UserModule,
     MessageModule,
     CloudinaryModule,
+    AdminModule,
   ],
 })
 export class AppModule {}

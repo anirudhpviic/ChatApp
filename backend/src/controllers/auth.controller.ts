@@ -16,13 +16,15 @@ export class AuthController {
       refreshToken: string;
       username: string;
       createdAt: Date;
+      role: string;
     };
   }> {
-    const { username, password } = body;
+    const { username, password, role } = body;
 
     const { user, accessToken, refreshToken } = await this.authService.signup(
       username,
       password,
+      role,
     );
 
     return {
@@ -40,14 +42,22 @@ export class AuthController {
       refreshToken: string;
       username: string;
       createdAt: Date;
+      role: string;
     };
   }> {
+
+    console.log('step1');
+
     const { username, password } = body;
+
+    console.log('step11');
 
     const { user, accessToken, refreshToken } = await this.authService.login(
       username,
       password,
     );
+
+    console.log('step2');
 
     console.log('login:', { accessToken, refreshToken, ...user });
     return {

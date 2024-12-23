@@ -3,13 +3,15 @@ import axios from "axios";
 const signup = async ({
   username,
   password,
+  role,
 }: {
   username: string;
   password: string;
+  role: string;
 }) => {
   return await axios.post(
     "http://localhost:3000/auth/signup",
-    { username, password },
+    { username, password ,role},
     { withCredentials: true }
   );
 };
@@ -40,7 +42,7 @@ const logout = async () => {
 const refreshToken = async (refreshToken: string) => {
   return await axios.post(
     "http://localhost:3000/auth/refresh-token",
-    {refreshToken},
+    { refreshToken },
     {
       withCredentials: true,
     }

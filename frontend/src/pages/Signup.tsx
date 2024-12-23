@@ -15,7 +15,7 @@ import { useAppDispatch } from "@/hooks/useRedux";
 import { setUser } from "@/redux/userSlice";
 import { useNavigate } from "react-router-dom";
 
-export default function SignUpPage() {
+export default function SignUpPage({ role }: { role: string }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -45,12 +45,17 @@ export default function SignUpPage() {
       setError("");
 
       try {
-        const res = await signup({ username, password });
+        const res = await signup({ username, password, role }); // Include role in signup payload
+        if (res.data.user.role === "admin") {
+          navigate("/admin");
+        } else {
+          navigate("/");
+        }
 
-        console.log("signup:",res.data.user);
+        console.log("signup:", res.data.user);
         dispatch(setUser(res.data.user));
-        navigate("/");
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // navigate("/");
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (error: any) {
         console.error(error);
         setError(error?.response?.data?.message || "Something went wrong");
@@ -58,7 +63,7 @@ export default function SignUpPage() {
         setIsPending(false);
       }
     },
-    [dispatch, navigate, username, password]
+    [username, password, role, dispatch, navigate]
   );
 
   const isButtonDisabled = useMemo(
@@ -97,6 +102,7 @@ export default function SignUpPage() {
                 onChange={handlePasswordChange}
               />
             </div>
+
             {error && <p className="text-red-500 text-sm">{error}</p>}
             <Button
               type="submit"
