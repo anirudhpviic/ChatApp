@@ -4,10 +4,12 @@ import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
 import { useGetAllChats } from "./hooks/chats/useGetAllChats";
 import useGetRealTimeChat from "./hooks/chats/useGetRealTimeChat";
+import useGetRealTimeMessages from "./hooks/messages/useGetRealTimeMessages";
 
 function App() {
   useGetAllChats();
   useGetRealTimeChat()
+  useGetRealTimeMessages()
 
   return (
     <Router>

@@ -23,20 +23,22 @@ const messageSlice = createSlice({
   reducers: {
     // Add a new chat to the array
     addMessage: (state, action) => {
-      console.log("action.payload", action.payload);
+      // console.log("action.payload", action.payload);
       // state =   [...state, action.payload];
-       state.push(action.payload); // Correctly updates state
+      state.push(action.payload); // Correctly updates state
     },
 
     setMessages: (state, action) => {
-      return state = [...action.payload];
+      return (state = [...action.payload]);
     },
 
-    updateMessage:(state,action)=>{
+    updateMessageSlice: (state, action) => {
       console.log("action.payload", action.payload);
+
       const messageIndex = state.findIndex((m) => m._id === action.payload._id);
       if (messageIndex !== -1) {
-        state[messageIndex] = { ...action.payload } 
+        // Replace the message at the found index
+        state[messageIndex] = action.payload;
       }
     },
 
@@ -56,5 +58,6 @@ const messageSlice = createSlice({
 });
 
 // Export the actions and reducer
-export const { addMessage, clearMessages,setMessages,updateMessage } = messageSlice.actions;
+export const { addMessage, clearMessages, setMessages, updateMessageSlice } =
+  messageSlice.actions;
 export default messageSlice.reducer;

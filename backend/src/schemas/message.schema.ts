@@ -12,7 +12,7 @@ export class Message extends Document {
   @Prop({ default: Date.now })
   createdAt: Date;
 
-  @Prop({ default: 'send' })
+  @Prop()
   status: string;
 
   @Prop({ type: Types.ObjectId, ref: 'Chat', required: true })

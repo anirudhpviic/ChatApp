@@ -13,16 +13,18 @@ export class MessageService {
     sender,
     message,
     groupId,
+    status,
   }: {
     sender: string;
     message: string;
     groupId: string;
+    status: string;
   }) {
     const newMessage = new this.messageModel({
       sender,
       message,
       groupId,
-      status: 'send',
+      status,
     });
     await newMessage.save();
     return newMessage;
@@ -40,15 +42,13 @@ export class MessageService {
 
   async updateMessageStatus({
     messageId,
-    groupId,
     status,
   }: {
     messageId: string;
-    groupId: string;
     status: string;
   }) {
     const updatedMessage = await this.messageModel.findOneAndUpdate(
-      { _id: messageId, groupId }, // Filter criteria
+      { _id: messageId }, // Filter criteria
       { status }, // Update fields
       { new: true }, // Return the updated document
     );

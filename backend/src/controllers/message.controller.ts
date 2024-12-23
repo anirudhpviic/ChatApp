@@ -8,6 +8,8 @@ export class MessageController {
   @Get()
   async getAllMessages(@Query('groupId') groupId: string) {
     console.log('getAllMessages', groupId);
-    return await this.messageService.getAllMessages(groupId);
+    const res = await this.messageService.getAllMessages(groupId);
+    console.log('getAllMessages res', res);
+    return res;
   }
 }

@@ -41,6 +41,7 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
     console.log(`Client disconnected: ${socket.id}`);
   }
 
+  // Messages logics
   @SubscribeMessage('sendMessage')
   async handleMessage(
     @MessageBody() data: { groupId: string; message: string; senderId: string },
@@ -50,9 +51,10 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
       sender: data.senderId,
       message: data.message,
       groupId: data.groupId,
+      status: 'send',
     });
 
-    console.log('new message:', savedMessage);
+    console.log('send message:', savedMessage);
 
     // Broadcast to the specific group room
     this.server.to(data.groupId).emit('receiveMessage', savedMessage);
@@ -65,11 +67,10 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
     // Save the message to the database
     const updatedMessage = await this.messageService.updateMessageStatus({
       messageId: data.messageId,
-      groupId: data.groupId,
       status: 'seen',
     });
 
-    console.log('updated message:', updatedMessage);
+    console.log('message seen:', updatedMessage);
 
     // Broadcast to the specific group room
     this.server.to(data.groupId).emit('messageSeenByUser', updatedMessage);
@@ -82,11 +83,10 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
     // Save the message to the database
     const updatedMessage = await this.messageService.updateMessageStatus({
       messageId: data.messageId,
-      groupId: data.groupId,
       status: 'delivered',
     });
 
-    console.log('updated message:', updatedMessage);
+    console.log('message delivered :', updatedMessage);
 
     // Broadcast to the specific group room
     this.server.to(data.groupId).emit('messageDeliveredByUser', updatedMessage);
