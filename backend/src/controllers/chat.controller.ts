@@ -1,31 +1,39 @@
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, Req } from '@nestjs/common';
 import { ChatService } from 'src/services/chat.service';
+import { Types } from 'mongoose';
 
 @Controller('chat')
 export class ChatController {
   constructor(private readonly chatService: ChatService) {}
 
   @Post('create')
-  async createChat(@Body() body) {
-    // TODO: user creating user id not there add later
-    // console.log(body)
-    // console.log('kere');
-
+  async createChat(
+    @Body()
+    body: {
+      data: {
+        groupName?: string;
+        participants: Types.ObjectId[];
+        type: 'one-to-one' | 'group';
+      };
+    },
+  ) {
     try {
-      return await this.chatService.createChat(body.data);
-      // console.log(res);
-      // return groupchat;
+      const res = await this.chatService.createChat(body.data);
+
+      return res;
     } catch (error) {
-      console.log(error);
+      console.error('Error creating chat:', error.message);
       throw error;
     }
   }
 
   @Get()
-  async getALlChats(@Query('userId') userId: string) {
-    console.log('uer:', userId);
-    const res = await this.chatService.allChats(userId);
-
-    return res;
+  async getAllChats(@Query('userId') userId: string) {
+    try {
+      return await this.chatService.allChats(userId);
+    } catch (error) {
+      console.error('Error fetching chats:', error.message);
+      throw error;
+    }
   }
 }

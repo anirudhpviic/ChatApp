@@ -21,22 +21,6 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @WebSocketServer() server: Server;
 
-  // async handleConnection(socket: Socket) {
-  //   console.log(`Client connected: ${socket.id}`);
-
-  //   // Simulate fetching user groups from a database
-  //   const userId = socket.handshake.query.userId as string; // Get userId from query params
-  //   const userGroups = await this.socketService.getUserGroups(userId); // Replace with DB call
-
-  //   console.log('userGroups', userGroups);
-
-  //   // // Join rooms for each group
-  //   userGroups.forEach(({ _id: groupId }) => {
-  //     socket.join(groupId as string);
-  //     console.log(`Socket ${socket.id} joined room ${groupId}`);
-  //   });
-  // }
-
   async handleConnection(socket: Socket) {
     console.log(`Client connected: ${socket.id}`);
 
@@ -56,19 +40,6 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
   handleDisconnect(socket: Socket) {
     console.log(`Client disconnected: ${socket.id}`);
   }
-
-  // @SubscribeMessage('sendMessage')
-  // handleMessage(
-  //   @MessageBody() data: { groupId: string; message: string },
-  //   @ConnectedSocket() socket: Socket,
-  // ) {
-  //   console.log('data', data);
-  //   // Broadcast message to the group room
-  //   this.server.to(data.groupId).emit('receiveMessage', {
-  //     sender: socket.id,
-  //     message: data.message,
-  //   });
-  // }
 
   @SubscribeMessage('sendMessage')
   async handleMessage(
@@ -120,10 +91,4 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
     // Broadcast to the specific group room
     this.server.to(data.groupId).emit('messageDeliveredByUser', updatedMessage);
   }
-
-  // Mock function to get user groups
-  //   async getUserGroups(userId: string): Promise<string[]> {
-  //     // Replace with actual DB logic
-  //     return ['group1', 'group2']; // Example group IDs
-  //   }
 }

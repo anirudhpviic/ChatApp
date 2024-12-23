@@ -9,108 +9,100 @@ import { Model } from 'mongoose';
 export class AuthService {
   constructor(
     @InjectModel(User.name) private readonly userModel: Model<User>,
-    private jwtService: JwtService,
+    private readonly jwtService: JwtService,
   ) {}
 
   async signup(username: string, password: string) {
+    // Check if username already exists
     try {
-      const hashedPassword = await bcrypt.hash(password, 10);
-      const user = new this.userModel({ username, password: hashedPassword });
+      const existingUser = await this.userModel.findOne({ username }).exec();
+      if (existingUser) {
+        throw new UnauthorizedException('Username already taken');
+      }
 
-      const { accessToken, refreshToken } = this.generateTokens(user);
-      user.refreshToken = refreshToken;
+      // Hash the password
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      // Create and save the new user
+      const user = await this.userModel.create({
+        username,
+        password: hashedPassword,
+      });
+
+      const tokens = this.generateTokens(user);
+      user.refreshToken = tokens.refreshToken;
       await user.save();
 
-      // TODO: change aggregation to normal find
-      const safeUser = await this.userModel.aggregate([
-        { $match: { username } },
-        {
-          $project: {
-            // Exclude sensitive fields
-            password: 0,
-            refreshToken: 0,
-          },
-        },
-      ]);
+      // Transform the user object to remove metadata
+      const safeUser = user.toObject(); // Converts to plain JS object
+      delete safeUser.password; // Ensure sensitive fields are excluded
+      delete safeUser.refreshToken;
 
-      return { user: safeUser[0], accessToken, refreshToken };
+      return { user: safeUser, ...tokens };
     } catch (error) {
-      console.error('Error signing up:', error);
       throw error;
     }
   }
 
   async login(username: string, password: string) {
-    try {
-      const user = await this.userModel.findOne({ username });
-      if (!user || !(await bcrypt.compare(password, user.password))) {
-        throw new UnauthorizedException('Invalid credentials');
-      }
-
-      const { accessToken, refreshToken } = this.generateTokens(user);
-      user.refreshToken = refreshToken;
-      // await user.save();
-
-      // TODO: change to normal find
-      // TODO: remove unwanted queries
-      const safeUser = await this.userModel.aggregate([
-        { $match: { username } },
-        {
-          $project: {
-            // Exclude sensitive fields
-            password: 0,
-            refreshToken: 0,
-          },
-        },
-      ]);
-
-      return { user: safeUser[0], accessToken, refreshToken };
-    } catch (error) {
-      throw error;
+    // Find the user
+    // const user = await this.userModel.findOne({ username }).exec();
+    const user = await this.userModel
+      .findOne({ username })
+      .select('-refreshToken') // Explicitly include password for comparison
+      .exec();
+    if (!user || !(await bcrypt.compare(password, user.password))) {
+      throw new UnauthorizedException('Invalid credentials');
     }
+
+    const tokens = this.generateTokens(user);
+    user.refreshToken = tokens.refreshToken;
+    await user.save();
+
+    // Transform the user object to remove metadata
+    const safeUser = user.toObject(); // Converts to plain JS object
+    delete safeUser.password; // Ensure sensitive fields are excluded
+
+    // Return user data without sensitive fields
+    // const safeUser = await this.userModel
+    //   .findById(user._id)
+    //   .select('-password -refreshToken')
+    //   .exec();
+
+    return { user: safeUser, ...tokens };
   }
 
   async refresh(refreshToken: string) {
-    try {
-      const user = await this.userModel.findOne({ refreshToken });
-
-      if (!user) {
-        throw new Error('Invalid refresh token');
-      }
-
-      // Generate a new access token
-      const { accessToken, refreshToken: newRefreshToken } =
-        this.generateTokens(user);
-
-      // Update the user's refresh token in the database
-      user.refreshToken = newRefreshToken;
-      await user.save();
-
-      return { accessToken, newRefreshToken };
-    } catch (error) {
-      throw error;
+    // Validate the refresh token
+    const user = await this.userModel.findOne({ refreshToken }).exec();
+    if (!user) {
+      throw new UnauthorizedException('Invalid refresh token');
     }
+
+    // Generate new tokens
+    const tokens = this.generateTokens(user);
+    user.refreshToken = tokens.refreshToken;
+    await user.save();
+
+    return tokens;
   }
 
-  //   generate tokens
   private generateTokens(user: User): {
     accessToken: string;
     refreshToken: string;
   } {
-    // Payload for the tokens
     const payload = { username: user.username, _id: user._id };
 
-    // Generate access token (valid for 15 minutes)
     const accessToken = this.jwtService.sign(payload, {
-      secret: process.env.JWT_ACCESS_SECRET, // Use environment variables
-      expiresIn: process.env.JWT_ACCESS_EXPIRATION || '15m', // Use default value if not set
+      secret: process.env.JWT_ACCESS_SECRET,
+      expiresIn: process.env.JWT_ACCESS_EXPIRATION || '15m',
     });
 
-    // Generate refresh token (valid for 7 days)
     const refreshToken = this.jwtService.sign(payload, {
-      secret: process.env.JWT_REFRESH_SECRET, // Use environment variables
-      expiresIn: process.env.JWT_REFRESH_EXPIRATION || '7d', // Use default value if not set
+      secret: process.env.JWT_REFRESH_SECRET,
+      expiresIn: process.env.JWT_REFRESH_EXPIRATION || '7d',
     });
+
     return { accessToken, refreshToken };
   }
 }

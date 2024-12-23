@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -23,23 +23,41 @@ export default function LoginPage() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setIsPending(true);
-    setError("");
+  const handleUsernameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setUsername(e.target.value);
+  }, []);
 
-    try {
-      const res = await login({ username, password });
+  const handlePasswordChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setPassword(e.target.value);
+  }, []);
 
-      dispatch(setUser(res.data));
-      navigate("/"); 
-    } catch (error: any) {
-      console.error(error);
-      setError("Something went wrong");
-    }
+  const handleSubmit = useCallback(
+    async (event: React.FormEvent<HTMLFormElement>) => {
+      event.preventDefault();
+      setIsPending(true);
+      setError("");
 
-    setIsPending(false);
-  };
+      try {
+        const res = await login({ username, password });
+
+        dispatch(setUser(res.data));
+        navigate("/");
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } catch (error: any) {
+        console.error(error);
+        setError(error?.response?.data?.message || "Something went wrong");
+      } finally {
+        setIsPending(false);
+      }
+    },
+    [username, password, dispatch, navigate]
+  );
+
+  const isButtonDisabled = useMemo(() => isPending || !username || !password, [
+    isPending,
+    username,
+    password,
+  ]);
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
@@ -57,7 +75,7 @@ export default function LoginPage() {
                 type="text"
                 required
                 value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                onChange={handleUsernameChange}
               />
             </div>
             <div className="space-y-2">
@@ -68,11 +86,11 @@ export default function LoginPage() {
                 type="password"
                 required
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={handlePasswordChange}
               />
             </div>
             {error && <p className="text-red-500 text-sm">{error}</p>}
-            <Button type="submit" className="w-full" disabled={isPending}>
+            <Button type="submit" className="w-full" disabled={isButtonDisabled}>
               {isPending ? "Logging In..." : "Login"}
             </Button>
           </form>
@@ -80,7 +98,10 @@ export default function LoginPage() {
         <CardFooter className="justify-center">
           <p className="text-sm text-gray-600">
             Don't have an account?{" "}
-            <a onClick={() => navigate("/signup")} className="text-blue-600 hover:underline">
+            <a
+              onClick={() => navigate("/signup")}
+              className="text-blue-600 hover:underline cursor-pointer"
+            >
               Sign Up
             </a>
           </p>

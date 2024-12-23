@@ -1,4 +1,4 @@
-import CreatePage from "@/components/CreateChat";
+import CreateChat from "@/components/CreateChat";
 import MessageList from "@/components/MessageList";
 import { Button } from "@/components/ui/button";
 import UserList from "@/components/UserList";
@@ -7,7 +7,7 @@ import { clearChats } from "@/redux/chatSlice";
 import { clearMessages } from "@/redux/messageSlice";
 import { clearSelectedChat } from "@/redux/selectedChat";
 import { clearUser } from "@/redux/userSlice";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 
 const HomePage = () => {
@@ -15,28 +15,45 @@ const HomePage = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    // Implement logout logic here
+  const handleLogout = useCallback(() => {
     dispatch(clearUser());
     dispatch(clearChats());
     dispatch(clearMessages());
     dispatch(clearSelectedChat());
-
     navigate("/login");
-  };
+  }, [dispatch, navigate]);
+
+  const handleOpenCreatePage = useCallback(() => {
+    setIsOpen(true);
+  }, []);
+
+  const handleCloseCreatePage = useCallback(() => {
+    setIsOpen(false);
+  }, []);
 
   return (
     <div className="flex h-screen">
-      <div className="w-1/4 border-r">
-        <Button onClick={() => setIsOpen(true)}>Create Group</Button>
-        <Button onClick={handleLogout}>Logout</Button>
-
+      {/* Sidebar */}
+      <div className="w-1/4 border-r p-4 space-y-4">
+        <Button onClick={handleOpenCreatePage} className="w-full">
+          Create Group
+        </Button>
+        <Button onClick={handleLogout} className="w-full">
+          Logout
+        </Button>
+        {/* User List */}
         <UserList />
       </div>
+
+      {/* Main Chat Area */}
       <div className="flex-1">
         <MessageList />
       </div>
-      {isOpen && <CreatePage isOpen={isOpen} setIsOpen={setIsOpen} />}{" "}
+
+      {/* Create Group Modal */}
+      {isOpen && (
+        <CreateChat isOpen={isOpen} setIsOpen={handleCloseCreatePage} />
+      )}
     </div>
   );
 };

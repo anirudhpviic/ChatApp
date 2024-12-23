@@ -1,4 +1,3 @@
-// src/features/user/userSlice.ts
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 // Define the shape of the user state
@@ -24,29 +23,22 @@ const userSlice = createSlice({
   name: "user",
   initialState,
   reducers: {
+    // Set the user state with provided data
     setUser: (state, action: PayloadAction<UserState>) => {
-      console.log("hre", action.payload);
-      const { username, _id, accessToken, refreshToken, createdAt } =
-        action.payload;
-
-      state.username = username;
-      state._id = _id;
-      state.accessToken = accessToken;
-      state.refreshToken = refreshToken;
-      state.createdAt = createdAt;
+      Object.assign(state, action.payload);
     },
 
+    // Update only the tokens in the user state
     updateUserTokens: (
       state,
       action: PayloadAction<{ accessToken: string; refreshToken: string }>
     ) => {
-      state = {
-        ...state,
-        accessToken: action.payload.accessToken,
-        refreshToken: action.payload.refreshToken,
-      };
+      state.accessToken = action.payload.accessToken;
+      state.refreshToken = action.payload.refreshToken;
     },
-    clearUser: () => initialState, // Resets to initial state
+
+    // Reset user state to initial values
+    clearUser: () => initialState,
   },
 });
 

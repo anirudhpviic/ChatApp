@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,22 +24,47 @@ export default function SignUpPage() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setIsPending(true);
-    setError("");
+  const handleUsernameChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setUsername(e.target.value);
+    },
+    []
+  );
 
-    try {
-      const res = await signup({ username, password });
-      dispatch(setUser(res.data.user));
-      navigate("/");
-    } catch (error: any) {
-      console.error(error);
-      setError("Something went wrong");
-    }
+  const handlePasswordChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setPassword(e.target.value);
+    },
+    []
+  );
 
-    setIsPending(false);
-  };
+  const handleSubmit = useCallback(
+    async (event: React.FormEvent<HTMLFormElement>) => {
+      event.preventDefault();
+      setIsPending(true);
+      setError("");
+
+      try {
+        const res = await signup({ username, password });
+
+        console.log("signup:",res.data.user);
+        dispatch(setUser(res.data.user));
+        navigate("/");
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } catch (error: any) {
+        console.error(error);
+        setError(error?.response?.data?.message || "Something went wrong");
+      } finally {
+        setIsPending(false);
+      }
+    },
+    [dispatch, navigate, username, password]
+  );
+
+  const isButtonDisabled = useMemo(
+    () => isPending || !username || !password,
+    [isPending, username, password]
+  );
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
@@ -58,7 +83,7 @@ export default function SignUpPage() {
                 type="text"
                 required
                 value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                onChange={handleUsernameChange}
               />
             </div>
             <div className="space-y-2">
@@ -69,11 +94,15 @@ export default function SignUpPage() {
                 type="password"
                 required
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={handlePasswordChange}
               />
             </div>
             {error && <p className="text-red-500 text-sm">{error}</p>}
-            <Button type="submit" className="w-full" disabled={isPending}>
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={isButtonDisabled}
+            >
               {isPending ? "Signing up..." : "Sign Up"}
             </Button>
           </form>
@@ -83,7 +112,7 @@ export default function SignUpPage() {
             Already have an account?{" "}
             <a
               onClick={() => navigate("/login")}
-              className="text-blue-600 hover:underline"
+              className="text-blue-600 hover:underline cursor-pointer"
             >
               Log in
             </a>

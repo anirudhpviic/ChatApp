@@ -11,10 +11,10 @@ async function bootstrap() {
 
   // Enable CORS
   app.enableCors({
-    origin: process.env.ORIGIN || 'http://localhost:5173', // Replace with your frontend URL
-    methods: ['GET', 'POST', 'PATCH', 'DELETE'], // Specify allowed methods
-    allowedHeaders: ['Content-Type', 'Authorization'], // Specify allowed headers
-    credentials: true, // Allow cookies
+    origin: process.env.ORIGIN || 'http://localhost:5173',
+    methods: ['GET', 'POST', 'PATCH', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
   });
 
   app.use(cookieParser());
@@ -24,12 +24,6 @@ async function bootstrap() {
 
   // Enable WebSocket
   app.useWebSocketAdapter(new IoAdapter(app));
-
-  // // TODO:testing
-  // const jwtService = app.get(JwtService);
-  // // Apply the AuthGuard globally
-  // app.useGlobalGuards(new AuthGuard(jwtService));
-  // // TODO: end
 
   const reflector = app.get(Reflector);
   const jwtService = app.get(JwtService);

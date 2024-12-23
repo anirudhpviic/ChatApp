@@ -1,16 +1,15 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Req } from '@nestjs/common';
 import { UserService } from 'src/services/user.service';
+import { Types } from 'mongoose';
 
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get()
-  async getAllUsers() {
+  async getAllUsers(@Req() req) {
     try {
-      const users = await this.userService.getAllUsers();
-      console.log(users);
-      return users;
+      return await this.userService.getAllUsers(req.user._id as Types.ObjectId);
     } catch (error) {
       throw error;
     }

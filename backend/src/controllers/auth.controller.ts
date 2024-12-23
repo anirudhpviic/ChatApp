@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Post } from '@nestjs/common';
 import { AuthService } from 'src/services/auth.service';
 import { AuthUserDto } from 'src/dto/user/auth-user.dto';
 import { Public } from 'src/decorators/public.decorator';
@@ -9,61 +9,67 @@ export class AuthController {
 
   @Public()
   @Post('/signup')
-  async signup(@Body() body: AuthUserDto) {
+  async signup(@Body() body: AuthUserDto): Promise<{
+    message: string;
+    user: {
+      accessToken: string;
+      refreshToken: string;
+      username: string;
+      createdAt: Date;
+    };
+  }> {
     const { username, password } = body;
 
-    try {
-      const { user, accessToken, refreshToken } = await this.authService.signup(
-        username,
-        password,
-      );
-      return {
-        message: 'User created successfully',
-        user: { accessToken, refreshToken, ...user },
-      };
-    } catch (error) {
-      console.error(error);
-    }
+    const { user, accessToken, refreshToken } = await this.authService.signup(
+      username,
+      password,
+    );
+
+    return {
+      message: 'User created successfully',
+      user: { accessToken, refreshToken, ...user },
+    };
   }
 
   @Public()
   @Post('/login')
-  async login(@Body() body: AuthUserDto) {
+  async login(@Body() body: AuthUserDto): Promise<{
+    message: string;
+    user: {
+      accessToken: string;
+      refreshToken: string;
+      username: string;
+      createdAt: Date;
+    };
+  }> {
     const { username, password } = body;
 
-    try {
-      const { user, accessToken, refreshToken } = await this.authService.login(
-        username,
-        password,
-      );
+    const { user, accessToken, refreshToken } = await this.authService.login(
+      username,
+      password,
+    );
 
-      return {
-        message: 'User logged in successfully',
-        user: { accessToken, refreshToken, ...user },
-      };
-    } catch (error) {
-      console.error(error);
-    }
+    console.log('login:', { accessToken, refreshToken, ...user });
+    return {
+      message: 'User logged in successfully',
+      user: { accessToken, refreshToken, ...user },
+    };
   }
 
   @Public()
-  @Post('refresh-token')
+  @Post('/refresh-token')
   async refreshToken(@Body() body: { refreshToken: string }) {
-    const { refreshToken } = body;
-    if (!refreshToken) {
+    if (!body.refreshToken) {
       throw new Error('No refresh token provided');
     }
-    try {
-      const { accessToken, newRefreshToken } =
-        await this.authService.refresh(refreshToken);
 
-      return {
-        message: 'Token refreshed successfully',
-        accessToken,
-        newRefreshToken,
-      };
-    } catch (error) {
-      console.error(error);
-    }
+    const { accessToken, refreshToken: newRefreshToken } =
+      await this.authService.refresh(body.refreshToken);
+
+    return {
+      message: 'Token refreshed successfully',
+      accessToken,
+      newRefreshToken,
+    };
   }
 }

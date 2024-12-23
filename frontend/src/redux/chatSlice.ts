@@ -9,7 +9,7 @@ interface Participant {
 
 // Define the shape of a chat
 interface Chat {
-  groupName?: string;
+  groupName?: string; // Optional for one-to-one chats
   type: "group" | "one-to-one";
   participants: Participant[];
   createdAt: string;
@@ -17,42 +17,28 @@ interface Chat {
 }
 
 // Initial state: an array of chats
-const initialState: Chat[] = []; // Directly store an array of chats
+const initialState: Chat[] = [];
 
 // Create a Redux slice
 const chatSlice = createSlice({
   name: "chat",
   initialState,
   reducers: {
-    // Add a new chat to the array
+    // Add a new chat to the state
     addChat: (state, action: PayloadAction<Chat>) => {
-      console.log("action.payload", action.payload);
       state.push(action.payload);
     },
 
-    // Update an existing chat by groupName
-    // updateChat: (state, action: PayloadAction<Chat>) => {
-    //   const { groupName, participants, createdAt } = action.payload;
-    //   const chatIndex = state.chats.findIndex(chat => chat.groupName === groupName);
+    // Replace the entire state with new chats
+    setChats: (state, action: PayloadAction<Chat[]>) => {
+      return action.payload; // Directly replace state
+    },
 
-    //   if (chatIndex !== -1) {
-    //     state.chats[chatIndex] = { groupName, participants, createdAt };
-    //   }
-    // },
-
-    // Clear all chats
+    // Clear all chats (reset to initial state)
     clearChats: () => initialState,
-
-    setChats:(state,action)=>{
-        console.log("action.payload chec", action.payload);
-        return state = [...action.payload];
-
-        // state = action.payload
-    }
-
-},
+  },
 });
 
 // Export the actions and reducer
-export const { addChat, clearChats,setChats } = chatSlice.actions;
+export const { addChat, clearChats, setChats } = chatSlice.actions;
 export default chatSlice.reducer;
