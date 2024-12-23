@@ -56,7 +56,16 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
   // Messages logics
   @SubscribeMessage('sendMessage')
   async handleMessage(
-    @MessageBody() data: { groupId: string; message: string; senderId: string },
+    @MessageBody()
+    data: {
+      groupId: string;
+      message: {
+        type: string;
+        content: string; // The actual content (text or file URL)
+        format?: string; // Optional format for files (e.g., "jpg", "pdf")
+      };
+      senderId: string;
+    },
   ) {
     // Save the message to the database
     const savedMessage = await this.messageService.createMessage({
@@ -106,11 +115,28 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
       // console.log('upload:', uploadResult.data);
       // console.log('url', uploadResult);
 
-      const uploadResult = await this.cloudinaryService.uploadFile(
+      const { url, type } = await this.cloudinaryService.uploadFile(
         fileData,
         fileName,
       );
-      console.log('Uploaded File URL:', uploadResult);
+      // console.log('Uploaded File URL:', uploadResult);
+
+      // Save the message to the database
+      const savedMessage = await this.messageService.createMessage({
+        sender: data.senderId,
+        groupId: data.groupId,
+        status: 'send',
+        message: {
+          type: 'file',
+          content: url,
+          // format: type,
+        },
+      });
+
+      // console.log('send message:', savedMessage);
+
+      // Broadcast to the specific group room
+      this.server.to(data.groupId).emit('receiveMessage', savedMessage);
     } catch (error) {
       console.error(error);
     }

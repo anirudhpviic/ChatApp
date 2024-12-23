@@ -49,7 +49,10 @@ export class CloudinaryService {
     });
   }
 
-  async uploadFile(fileData: Buffer, fileName: string): Promise<string> {
+  async uploadFile(
+    fileData: Buffer,
+    fileName: string,
+  ): Promise<{ url: string; type: string }> {
     return new Promise((resolve, reject) => {
       const uploadStream = cloudinary.v2.uploader.upload_stream(
         { resource_type: 'auto', public_id: fileName },
@@ -57,7 +60,8 @@ export class CloudinaryService {
           if (error) {
             return reject(error);
           }
-          resolve(result.secure_url); // Resolve the promise with the file URL
+
+          resolve({ url: result.secure_url, type: result.resource_type }); // Resolve the promise with the file URL
         },
       );
 

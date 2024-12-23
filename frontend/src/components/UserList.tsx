@@ -5,7 +5,7 @@ import { setSelectedChat } from "@/redux/selectedChat";
 export default function UserList() {
   const chats = useAppSelector((state) => state.chat);
   const dispatch = useAppDispatch();
-  const { _id: userId } = useAppSelector((state) => state.user);
+  const { _id: userId, username } = useAppSelector((state) => state.user);
 
   // Helper to get username or group initials
   const getAvatarInitial = (chat) => {
@@ -29,6 +29,7 @@ export default function UserList() {
   return (
     <div className="p-4">
       <h2 className="text-xl font-bold mb-4">Chats</h2>
+      <p>{username}</p>
       <ul className="space-y-2">
         {chats.map((chat) => (
           <li

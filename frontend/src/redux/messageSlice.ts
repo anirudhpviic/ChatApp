@@ -8,7 +8,7 @@ interface Message {
   createdAt: string;
   _id: string;
   sender: string;
-  message: string;
+  message: { type: string; content: string; format?: string };
   groupId: string;
   status: string;
 }

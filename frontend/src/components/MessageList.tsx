@@ -151,7 +151,6 @@
 //   );
 // }
 
-
 // import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 // import { Button } from "@/components/ui/button";
 // import { Input } from "@/components/ui/input";
@@ -293,7 +292,6 @@
 //   );
 // }
 
-
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -320,7 +318,7 @@ export default function MessageList() {
     if (socket && message.trim()) {
       socket.emit("sendMessage", {
         groupId: selectedChat._id,
-        message,
+        message: { type: "text", content: message },
         senderId: user._id,
       });
       setMessage(""); // Clear input
@@ -328,24 +326,53 @@ export default function MessageList() {
   };
 
   // Handle file sending
-  const sendFileMessage = () => {
+  // const sendFileMessage = () => {
+  //   console.log("file", file);
+
+  //   if (socket && file) {
+  //     const formData = new FormData();
+  //     formData.append("groupId", selectedChat._id);
+  //     formData.append("senderId", user._id);
+  //     formData.append("file", file);
+
+  //     // Emit the file event
+  //     socket.emit("sendFile", {
+  //       groupId: selectedChat._id,
+  //       senderId: user._id,
+  //       fileName: file.name,
+  //       fileData: file,
+  //     });
+
+  //     setFile(null); // Clear the selected file
+  //   }
+  // };
+
+  const sendFileMessage = async () => {
     if (socket && file) {
-      const formData = new FormData();
-      formData.append("groupId", selectedChat._id);
-      formData.append("senderId", user._id);
-      formData.append("file", file);
+      try {
+        // Create form data for the file
+        const formData = new FormData();
+        formData.append("groupId", selectedChat._id);
+        formData.append("senderId", user._id);
+        formData.append("file", file);
 
-      
+        // Emit file message to the server
+        socket.emit("sendFile", {
+          groupId: selectedChat._id,
+          senderId: user._id,
+          fileName: file.name,
+          fileData: file,
+        });
 
-      // Emit the file event
-      socket.emit("sendFile", {
-        groupId: selectedChat._id,
-        senderId: user._id,
-        fileName: file.name,
-        fileData: file,
-      });
+        // Optionally handle server acknowledgment if needed
+        console.log("File sent successfully!");
 
-      setFile(null); // Clear the selected file
+        // Reset the file input only after confirmation
+        setFile(null);
+      } catch (error) {
+        console.error("Error sending file:", error);
+        alert("Failed to send the file. Please try again.");
+      }
     }
   };
 
@@ -353,6 +380,8 @@ export default function MessageList() {
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
     if (selectedFile) {
+      console.log("Selected file:", selectedFile);
+      
       setFile(selectedFile);
     } else {
       alert("No file selected or invalid file.");
@@ -366,7 +395,8 @@ export default function MessageList() {
     <div className="flex flex-col h-full">
       <div className="flex-1 overflow-y-auto p-4">
         <h2 className="text-xl font-bold mb-4">
-          Messages - {selectedChat.type === "group" ? selectedChat.groupName : "Chat"}
+          Messages -{" "}
+          {selectedChat.type === "group" ? selectedChat.groupName : "Chat"}
         </h2>
         <ul className="space-y-4">
           {messages.map((message) => (
@@ -378,7 +408,9 @@ export default function MessageList() {
             >
               <div
                 className={`flex items-start space-x-2 max-w-[70%] ${
-                  message.sender === user._id ? "flex-row-reverse space-x-reverse" : ""
+                  message.sender === user._id
+                    ? "flex-row-reverse space-x-reverse"
+                    : ""
                 }`}
               >
                 {message.sender !== user._id && (
@@ -398,8 +430,18 @@ export default function MessageList() {
                   <p className="font-medium">
                     {message.sender === user._id ? "You" : message.sender}
                   </p>
-                  <p>{message.message}</p>
-                  <p className="text-xs text-gray-500 mt-1">{message.status}</p>
+                  <p>
+                    {message.message.type === "text" && message.message.content}
+                  </p>
+                  <img
+                    src={
+                      message.message.type === "file" && message.message.content
+                    }
+                    alt=""
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    {selectedChat.type !== "group" && message?.status}
+                  </p>
                 </div>
               </div>
             </li>
@@ -429,12 +471,12 @@ export default function MessageList() {
             <span className="sr-only">Send</span>
           </Button>
         </form>
-        {file && (
+        {/* {file && ( */}
           <div className="mt-2 flex items-center space-x-2">
-            <p className="text-sm text-gray-500">Selected file: {file.name}</p>
+            <p className="text-sm text-gray-500">Selected file: {file?.name}</p>
             <Button onClick={sendFileMessage}>Send File</Button>
           </div>
-        )}
+        {/* )} */}
       </div>
     </div>
   );

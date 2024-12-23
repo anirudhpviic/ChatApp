@@ -20,7 +20,11 @@ export class MessageService {
     status,
   }: {
     sender: string;
-    message: string;
+    message: {
+      type: string;
+      content: string; // The actual content (text or file URL)
+      format?: string; // Optional format for files (e.g., "jpg", "pdf")
+    };
     groupId: string;
     status: string;
   }) {
@@ -30,6 +34,7 @@ export class MessageService {
       groupId,
       status,
     });
+
     await newMessage.save();
     return newMessage;
   }
@@ -45,7 +50,7 @@ export class MessageService {
 
     const server = this.socketService.getServer();
 
-    console.log("messages groupId", groupId);
+    console.log('messages groupId', groupId);
 
     if (chat.type === 'one-to-one') {
       // If the chat is one-to-one and the current user is not the sender, update status to "seen"
