@@ -3,14 +3,12 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Chat } from 'src/schemas/chat.schema';
 import { User } from 'src/schemas/user.schema';
-import { SocketService } from './socket.service';
 
 @Injectable()
 export class ChatService {
   constructor(
     @InjectModel(Chat.name) private readonly chatModel: Model<Chat>,
     @InjectModel(User.name) private readonly userModel: Model<User>,
-    private readonly socketService: SocketService,
   ) {}
 
   async createChat({
@@ -22,11 +20,10 @@ export class ChatService {
     participants: Types.ObjectId[];
     type: 'one-to-one' | 'group';
   }) {
+    // Validate inputs
     if (!participants || participants.length < 1) {
       throw new BadRequestException('Participants array must not be empty');
     }
-
-    // Validate inputs
     if (type === 'group' && !groupName) {
       throw new BadRequestException('Group name is required for group chats');
     }
@@ -36,13 +33,14 @@ export class ChatService {
       );
     }
 
-    // TODO: stopped
+    // Prepare chat data
     const chatData: Partial<Chat> = { type, participants };
     if (type === 'group') chatData.groupName = groupName;
 
+    // Create the chat
     const chat = await this.chatModel.create(chatData);
 
-    // Populate participant details
+    // Fetch participant details
     const participantDetails = await this.userModel
       .find({ _id: { $in: participants } })
       .select('_id username');
@@ -60,10 +58,12 @@ export class ChatService {
       throw new BadRequestException('User ID is required');
     }
 
+    // Fetch chats involving the user
     const chats = await this.chatModel
       .find({ participants: userId })
       .select('_id groupName type participants');
 
+    // Populate participant details for each chat
     const populatedChats = await Promise.all(
       chats.map(async (chat) => {
         const participantDetails = await this.userModel

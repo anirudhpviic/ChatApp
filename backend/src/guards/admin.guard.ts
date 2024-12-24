@@ -13,8 +13,6 @@ export class RolesGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     const user = request.user; // `req.user` should be populated by your JWT auth strategy.
 
-      console.log('User:', user);
-
     if (!user) {
       throw new ForbiddenException('User not authenticated');
     }

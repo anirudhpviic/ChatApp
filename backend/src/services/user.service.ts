@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { User } from 'src/schemas/user.schema';
 import { Model, Types } from 'mongoose';
@@ -11,10 +11,10 @@ export class UserService {
 
   async getAllUsers(userId: Types.ObjectId) {
     try {
-      const users = await this.userModel.aggregate([
+      return await this.userModel.aggregate([
         {
           $match: {
-            _id: { $ne: new Types.ObjectId(userId) }, // Exclude the user with the given userId
+            _id: { $ne: userId }, // Exclude the user with the given userId
           },
         },
         {
@@ -24,12 +24,9 @@ export class UserService {
           },
         },
       ]);
-      console.log('userId', userId);
-      console.log('users', users);
-      return users;
     } catch (error) {
-      console.error('Error fetching users:', error);
-      throw new Error('Failed to fetch users');
+      console.error('Error fetching users:', error.message);
+      throw new InternalServerErrorException('Failed to fetch users');
     }
   }
 }

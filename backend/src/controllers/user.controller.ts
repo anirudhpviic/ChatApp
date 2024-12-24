@@ -8,10 +8,7 @@ export class UserController {
 
   @Get()
   async getAllUsers(@Req() req) {
-    try {
-      return await this.userService.getAllUsers(req.user._id as Types.ObjectId);
-    } catch (error) {
-      throw error;
-    }
+    const userId = req.user._id as Types.ObjectId;
+    return this.userService.getAllUsers(userId);
   }
 }

@@ -1,5 +1,3 @@
-import { UploadedFile, UseInterceptors } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
 import {
   WebSocketGateway,
   WebSocketServer,
@@ -9,51 +7,46 @@ import {
   MessageBody,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { multerConfig } from 'src/config/multer.config';
 import { MessageService } from 'src/services/message.service';
 import { SocketService } from 'src/services/socket.service';
-import { Multer } from 'multer';
-import { join } from 'path';
-import { writeFile, writeFileSync } from 'fs';
-import { Readable } from 'stream';
-import { v2 as cloudinary } from 'cloudinary';
 import { CloudinaryService } from 'src/services/cloudinary.service';
 
 @WebSocketGateway({
   cors: { origin: '*' }, // Allow all origins for simplicity
 })
 export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
+  @WebSocketServer() server: Server;
+
   constructor(
     private readonly socketService: SocketService,
     private readonly messageService: MessageService,
-    private cloudinaryService: CloudinaryService,
+    private readonly cloudinaryService: CloudinaryService,
   ) {}
-
-  @WebSocketServer() server: Server;
 
   async handleConnection(socket: Socket) {
     console.log(`Client connected: ${socket.id}`);
-
-    this.socketService.setServer(this.server);
-
     const userId = socket.handshake.query.userId as string;
 
-    // Fetch groups for the user (mocked or from DB)
-    const userGroups = await this.socketService.getUserGroups(userId);
-    console.log('User groups:', userGroups);
+    try {
+      // Associate the socket with the user in the service
+      this.socketService.setServer(this.server);
 
-    // Ensure user joins each room
-    userGroups.forEach(({ _id: groupId }) => {
-      socket.join(groupId.toString());
-      console.log(`Socket ${socket.id} joined room ${groupId}`);
-    });
+      // Fetch and join user groups
+      const userGroups = await this.socketService.getUserGroups(userId);
+      userGroups.forEach(({ _id: groupId }) => {
+        socket.join(groupId.toString());
+        console.log(`Socket ${socket.id} joined room ${groupId}`);
+      });
+    } catch (error) {
+      console.error('Error handling connection:', error.message);
+      socket.disconnect();
+    }
   }
 
   handleDisconnect(socket: Socket) {
     console.log(`Client disconnected: ${socket.id}`);
   }
 
-  // Messages logics
   @SubscribeMessage('sendMessage')
   async handleMessage(
     @MessageBody()
@@ -61,84 +54,61 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
       groupId: string;
       message: {
         type: string;
-        content: string; // The actual content (text or file URL)
-        format?: string; // Optional format for files (e.g., "jpg", "pdf")
+        content: string;
+        format?: string;
       };
       senderId: string;
     },
   ) {
-    // Save the message to the database
-    const savedMessage = await this.messageService.createMessage({
-      sender: data.senderId,
-      message: data.message,
-      groupId: data.groupId,
-      status: 'send',
-    });
+    try {
+      // Save the message and broadcast it
+      const savedMessage = await this.messageService.createMessage({
+        sender: data.senderId,
+        message: data.message,
+        groupId: data.groupId,
+        status: 'send',
+      });
 
-    console.log('send message:', savedMessage);
-
-    // Broadcast to the specific group room
-    this.server.to(data.groupId).emit('receiveMessage', savedMessage);
+      this.server.to(data.groupId).emit('receiveMessage', savedMessage);
+    } catch (error) {
+      console.error('Error handling message:', error.message);
+    }
   }
 
-  // Handle file upload event
-  // @SubscribeMessage('sendFile')
-  // async handleFileUpload(@MessageBody() data) {
-  //   try {
-  //     console.log(data);
-
-  //     const { fileName, fileData } = data;
-
-  //     const filePath = join(__dirname, '..', 'uploads', fileName); // Save to "uploads" directory
-  //     // await writeFile(filePath, fileData); // Write the buffer to a file
-  //     await writeFile(filePath, fileData, { encoding: 'utf8' });
-  //     console.log(`File saved at: ${filePath}`);
-  //   } catch (error) {
-  //     console.error('File upload failed:', error);
-  //     this.server.emit('fileUploaded', {
-  //       success: false,
-  //       error: error.message,
-  //     });
-  //   }
-  // }
-
-  // Handle file upload event
   @SubscribeMessage('sendFile')
-  async handleFileUpload(@MessageBody() data) {
-    const { fileName, fileData } = data;
+  async handleFileUpload(
+    @MessageBody()
+    data: {
+      groupId: string;
+      fileName: string;
+      fileData: Buffer;
+      senderId: string;
+    },
+  ) {
+    const { fileName, fileData, groupId, senderId } = data;
 
     try {
-      // const uploadResult: any = await this.cloudinaryService.uploadFile(
-      //   fileData,
-      //   fileName,
-      // );
-      // console.log('upload:', uploadResult.data);
-      // console.log('url', uploadResult);
-
+      // Upload file to Cloudinary
       const { url, type } = await this.cloudinaryService.uploadFile(
         fileData,
         fileName,
       );
-      // console.log('Uploaded File URL:', uploadResult);
 
-      // Save the message to the database
+      // Save message with file data
       const savedMessage = await this.messageService.createMessage({
-        sender: data.senderId,
-        groupId: data.groupId,
+        sender: senderId,
+        groupId,
         status: 'send',
         message: {
           type: 'file',
           content: url,
-          // format: type,
         },
       });
 
-      // console.log('send message:', savedMessage);
-
-      // Broadcast to the specific group room
-      this.server.to(data.groupId).emit('receiveMessage', savedMessage);
+      // Broadcast the message to the group
+      this.server.to(groupId).emit('receiveMessage', savedMessage);
     } catch (error) {
-      console.error(error);
+      console.error('Error handling file upload:', error.message);
     }
   }
 
@@ -146,31 +116,36 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
   async handleMessageSeen(
     @MessageBody() data: { groupId: string; messageId: string },
   ) {
-    // Save the message to the database
-    const updatedMessage = await this.messageService.updateMessageStatus({
-      messageId: data.messageId,
-      status: 'seen',
-    });
+    try {
+      const updatedMessage = await this.messageService.updateMessageStatus({
+        messageId: data.messageId,
+        status: 'seen',
+      });
 
-    console.log('message seen:', updatedMessage);
-
-    // Broadcast to the specific group room
-    this.server.to(data.groupId).emit('messageSeenByUser', updatedMessage);
+      this.server.to(data.groupId).emit('messageSeenByUser', updatedMessage);
+    } catch (error) {
+      console.error('Error updating message status to seen:', error.message);
+    }
   }
 
   @SubscribeMessage('messageDelivered')
   async handleMessageDelivered(
     @MessageBody() data: { groupId: string; messageId: string },
   ) {
-    // Save the message to the database
-    const updatedMessage = await this.messageService.updateMessageStatus({
-      messageId: data.messageId,
-      status: 'delivered',
-    });
+    try {
+      const updatedMessage = await this.messageService.updateMessageStatus({
+        messageId: data.messageId,
+        status: 'delivered',
+      });
 
-    console.log('message delivered :', updatedMessage);
-
-    // Broadcast to the specific group room
-    this.server.to(data.groupId).emit('messageDeliveredByUser', updatedMessage);
+      this.server
+        .to(data.groupId)
+        .emit('messageDeliveredByUser', updatedMessage);
+    } catch (error) {
+      console.error(
+        'Error updating message status to delivered:',
+        error.message,
+      );
+    }
   }
 }

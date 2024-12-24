@@ -9,18 +9,8 @@ export class AuthController {
 
   @Public()
   @Post('/signup')
-  async signup(@Body() body: AuthUserDto): Promise<{
-    message: string;
-    user: {
-      accessToken: string;
-      refreshToken: string;
-      username: string;
-      createdAt: Date;
-      role: string;
-    };
-  }> {
+  async signup(@Body() body: AuthUserDto) {
     const { username, password, role } = body;
-
     const { user, accessToken, refreshToken } = await this.authService.signup(
       username,
       password,
@@ -35,31 +25,13 @@ export class AuthController {
 
   @Public()
   @Post('/login')
-  async login(@Body() body: AuthUserDto): Promise<{
-    message: string;
-    user: {
-      accessToken: string;
-      refreshToken: string;
-      username: string;
-      createdAt: Date;
-      role: string;
-    };
-  }> {
-
-    console.log('step1');
-
+  async login(@Body() body: AuthUserDto) {
     const { username, password } = body;
-
-    console.log('step11');
-
     const { user, accessToken, refreshToken } = await this.authService.login(
       username,
       password,
     );
 
-    console.log('step2');
-
-    console.log('login:', { accessToken, refreshToken, ...user });
     return {
       message: 'User logged in successfully',
       user: { accessToken, refreshToken, ...user },
@@ -69,17 +41,12 @@ export class AuthController {
   @Public()
   @Post('/refresh-token')
   async refreshToken(@Body() body: { refreshToken: string }) {
-    if (!body.refreshToken) {
-      throw new Error('No refresh token provided');
-    }
-
-    const { accessToken, refreshToken: newRefreshToken } =
-      await this.authService.refresh(body.refreshToken);
+    const { refreshToken } = body;
+    const tokens = await this.authService.refresh(refreshToken);
 
     return {
       message: 'Token refreshed successfully',
-      accessToken,
-      newRefreshToken,
+      ...tokens,
     };
   }
 }

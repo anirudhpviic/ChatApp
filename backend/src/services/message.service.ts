@@ -1,16 +1,16 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Message } from 'src/schemas/message.schema';
 import { Model, Types } from 'mongoose';
-import { SocketService } from './socket.service';
+import { Message } from 'src/schemas/message.schema';
 import { Chat } from 'src/schemas/chat.schema';
+import { SocketService } from './socket.service';
 
 @Injectable()
 export class MessageService {
   constructor(
     @InjectModel(Message.name) private readonly messageModel: Model<Message>,
-    private readonly socketService: SocketService,
     @InjectModel(Chat.name) private readonly chatModel: Model<Chat>,
+    private readonly socketService: SocketService,
   ) {}
 
   async createMessage({
@@ -28,39 +28,47 @@ export class MessageService {
     groupId: string;
     status: string;
   }) {
-    const newMessage = new this.messageModel({
+    const newMessage = await this.messageModel.create({
       sender,
       message,
       groupId,
       status,
     });
-
-    await newMessage.save();
     return newMessage;
   }
 
-  async getAllMessages(groupId, userId) {
-    // const messages = await this.messageModel.find({groupId});
-    // console.log(messages);
-    const messages = await this.messageModel.find({ groupId });
-    // .sort({ createdAt: 1 });
-    // .exec();
+  async getAllMessages(groupId: string, userId: string) {
+    if (!groupId || !userId) {
+      throw new NotFoundException('Group ID and User ID are required');
+    }
+
+    const messages = await this.messageModel
+      .find({ groupId })
+      .sort({ createdAt: 1 });
 
     const chat = await this.chatModel.findById(groupId);
-
-    const server = this.socketService.getServer();
-
-    console.log('messages groupId', groupId);
+    if (!chat) {
+      throw new NotFoundException('Chat not found');
+    }
 
     if (chat.type === 'one-to-one') {
-      // If the chat is one-to-one and the current user is not the sender, update status to "seen"
-      for (const message of messages) {
-        if (message.sender !== userId && message.status !== 'seen') {
-          message.status = 'seen';
-          await message.save();
+      const unseenMessages = messages.filter(
+        (message) =>
+          message.sender !== new Types.ObjectId(userId) &&
+          message.status !== 'seen',
+      );
 
-          server.to(groupId).emit('messageSeenByUser', message);
-        }
+      if (unseenMessages.length > 0) {
+        await Promise.all(
+          unseenMessages.map(async (message) => {
+            message.status = 'seen';
+            await message.save();
+            this.socketService
+              .getServer()
+              .to(groupId)
+              .emit('messageSeenByUser', message);
+          }),
+        );
       }
     }
 
@@ -74,14 +82,14 @@ export class MessageService {
     messageId: string;
     status: string;
   }) {
-    const updatedMessage = await this.messageModel.findOneAndUpdate(
-      { _id: messageId }, // Filter criteria
-      { status }, // Update fields
-      { new: true }, // Return the updated document
+    const updatedMessage = await this.messageModel.findByIdAndUpdate(
+      messageId,
+      { status },
+      { new: true },
     );
 
     if (!updatedMessage) {
-      throw new NotFoundException('Message not found or group mismatch');
+      throw new NotFoundException('Message not found');
     }
 
     return updatedMessage;
