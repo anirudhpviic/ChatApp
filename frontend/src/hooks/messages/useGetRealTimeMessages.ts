@@ -12,6 +12,8 @@ const useGetRealTimeMessages = () => {
 
   useEffect(() => {
     socket?.on("receiveMessage", (message) => {
+      console.log("chat.id", selectedChat._id);
+      
       console.log("real time message",message);
       if (message.groupId === selectedChat._id) {
         dispatch(addMessage(message));
@@ -33,12 +35,14 @@ const useGetRealTimeMessages = () => {
           });
         }
       }
+
+
     });
 
     return () => {
       socket?.off("receiveMessage");
     };
-  }, [socket, dispatch, selectedChat._id, user?._id]);
+  }, [socket, dispatch, selectedChat._id]);
 
   useEffect(() => {
     const handleMessageDelivered = (updatedMessage) => {
