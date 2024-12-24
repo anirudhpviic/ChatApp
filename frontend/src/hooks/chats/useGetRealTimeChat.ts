@@ -6,6 +6,7 @@ import { addChat } from "@/redux/chatSlice";
 const useGetRealTimeChat = () => {
   const { socket } = useSocketContext();
   const chats = useAppSelector((state) => state.chat);
+  const { _id: userId } = useAppSelector((state) => state.user);
   const dispatch = useAppDispatch();
   // useEffect(() => {
   //   const handleNewChat = (newChat) => {
@@ -20,18 +21,39 @@ const useGetRealTimeChat = () => {
   // }, [dispatch, socket]);
 
   useEffect(() => {
-    const handleNewChat = (newChat) => {
-      console.log("newChat:", newChat);
-      // if (chats.some((chat) => chat.F_id === newChat._id)) return;
+    const handleNewChat = (groupId) => {
+      console.log("joinChatRoom:", groupId);
       // dispatch(addChat(newChat));
+      socket?.emit("newRoomJoin", {groupId, userId});
     };
 
-    socket?.on("newChat", handleNewChat);
+    socket?.on("joinChatRoom", handleNewChat);
 
     return () => {
-      socket?.off("newChat", handleNewChat);
+      socket?.off("joinChatRoom", handleNewChat);
     };
-  }, [ dispatch, socket]);
+  }, [socket, userId]);
+  
+
+  useEffect(() => {
+    const handleNewRoomJoined =(data)=>{
+      console.log("newRoomJoined: adsf ");
+      
+      console.log("newRoomJoined:", data);
+
+      dispatch(addChat(data));
+
+      
+    }
+
+    socket?.on("newRoomJoined", handleNewRoomJoined);
+  
+    return () => {
+      socket?.off("newRoomJoined", handleNewRoomJoined);
+    }
+  }, [socket])
+  
+
 };
 
 export default useGetRealTimeChat;

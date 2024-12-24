@@ -381,7 +381,7 @@ export default function MessageList() {
     const selectedFile = e.target.files[0];
     if (selectedFile) {
       console.log("Selected file:", selectedFile);
-      
+
       setFile(selectedFile);
     } else {
       alert("No file selected or invalid file.");
@@ -419,7 +419,14 @@ export default function MessageList() {
                       src="/placeholder.svg?height=32&width=32"
                       alt={message.sender}
                     />
-                    <AvatarFallback>{message.sender}</AvatarFallback>
+                    <AvatarFallback>
+                      {" "}
+                      {message.sender === user._id
+                        ? "You"
+                        : selectedChat.participants.filter(
+                            (p) => p._id === message.sender
+                          )[0].username}
+                    </AvatarFallback>
                   </Avatar>
                 )}
                 <div
@@ -428,7 +435,11 @@ export default function MessageList() {
                   }`}
                 >
                   <p className="font-medium">
-                    {message.sender === user._id ? "You" : message.sender}
+                    {message.sender === user._id
+                      ? "You"
+                      : selectedChat.participants.filter(
+                          (p) => p._id === message.sender
+                        )[0].username}
                   </p>
                   <p>
                     {message.message.type === "text" && message.message.content}
@@ -472,10 +483,10 @@ export default function MessageList() {
           </Button>
         </form>
         {/* {file && ( */}
-          <div className="mt-2 flex items-center space-x-2">
-            <p className="text-sm text-gray-500">Selected file: {file?.name}</p>
-            <Button onClick={sendFileMessage}>Send File</Button>
-          </div>
+        <div className="mt-2 flex items-center space-x-2">
+          <p className="text-sm text-gray-500">Selected file: {file?.name}</p>
+          <Button onClick={sendFileMessage}>Send File</Button>
+        </div>
         {/* )} */}
       </div>
     </div>
