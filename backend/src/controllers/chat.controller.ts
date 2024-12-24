@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, Req } from '@nestjs/common';
 import { ChatService } from 'src/services/chat.service';
 import { Types } from 'mongoose';
 
@@ -14,9 +14,16 @@ export class ChatController {
       participants: Types.ObjectId[];
       type: 'one-to-one' | 'group';
     },
+    @Req() req,
   ) {
+    const userId = req.user._id;
     const { groupName, participants, type } = body;
-    return this.chatService.createChat({ groupName, participants, type });
+    return this.chatService.createChat({
+      groupName,
+      participants,
+      type,
+      userId,
+    });
   }
 
   @Get()

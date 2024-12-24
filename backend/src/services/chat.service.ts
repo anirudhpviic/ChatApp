@@ -3,22 +3,26 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Chat } from 'src/schemas/chat.schema';
 import { User } from 'src/schemas/user.schema';
+import { SocketService } from './socket.service';
 
 @Injectable()
 export class ChatService {
   constructor(
     @InjectModel(Chat.name) private readonly chatModel: Model<Chat>,
     @InjectModel(User.name) private readonly userModel: Model<User>,
+    private readonly socketService: SocketService,
   ) {}
 
   async createChat({
     groupName,
     participants,
     type,
+    userId,
   }: {
     groupName?: string;
     participants: Types.ObjectId[];
     type: 'one-to-one' | 'group';
+    userId: Types.ObjectId;
   }) {
     // Validate inputs
     if (!participants || participants.length < 1) {
@@ -44,6 +48,15 @@ export class ChatService {
     const participantDetails = await this.userModel
       .find({ _id: { $in: participants } })
       .select('_id username');
+
+    // Join the chat room for each participant
+    participants.forEach((participantId) => {
+      if (participantId === userId) return;
+      this.socketService
+        .getServer()
+        .to(participantId.toString())
+        .emit('joinChatRoom', chat._id.toString());
+    });
 
     return {
       _id: chat._id,
