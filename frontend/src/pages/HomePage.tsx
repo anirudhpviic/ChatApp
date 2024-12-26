@@ -1,3 +1,4 @@
+import CreateBroadCast from "@/components/CreateBroadCast";
 import CreateChat from "@/components/CreateChat";
 import MessageList from "@/components/MessageList";
 import { Button } from "@/components/ui/button";
@@ -12,6 +13,7 @@ import { useNavigate } from "react-router-dom";
 
 const HomePage = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isOpenBroadCastCreate, setIsOpenBroadCastCreate] = useState(false);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
@@ -31,12 +33,24 @@ const HomePage = () => {
     setIsOpen(false);
   }, []);
 
+  const handleOpenCrateBroadCast = useCallback(() => {
+    setIsOpenBroadCastCreate(true);
+  }, []);
+
+  const handleCloseCrateBroadCast = useCallback(() => {
+    setIsOpenBroadCastCreate(false);
+  }, []);
+
   return (
     <div className="flex h-screen">
       {/* Sidebar */}
       <div className="w-1/4 border-r p-4 space-y-4">
         <Button onClick={handleOpenCreatePage} className="w-full">
-          Create Group
+          Create Chat
+        </Button>
+        {/* create broadcast */}
+        <Button onClick={handleOpenCrateBroadCast} className="w-full">
+          Create BroadCast
         </Button>
         <Button onClick={handleLogout} className="w-full">
           Logout
@@ -53,6 +67,12 @@ const HomePage = () => {
       {/* Create Group Modal */}
       {isOpen && (
         <CreateChat isOpen={isOpen} setIsOpen={handleCloseCreatePage} />
+      )}
+      {isOpenBroadCastCreate && (
+        <CreateBroadCast
+          isOpen={isOpenBroadCastCreate}
+          setIsOpen={handleCloseCrateBroadCast}
+        />
       )}
     </div>
   );

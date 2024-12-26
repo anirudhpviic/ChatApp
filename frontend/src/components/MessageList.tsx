@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useSocketContext } from "@/context/SocketContext";
 import useGetAllMessages from "@/hooks/messages/useGetAllMessages";
-import { useAppSelector } from "@/hooks/useRedux";
+import { useAppDispatch, useAppSelector } from "@/hooks/useRedux";
 import { Send, Image as ImageIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -13,6 +13,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { apiClient } from "@/api/config";
+import { addMessage } from "@/redux/messageSlice";
 
 const names = [
   "Alice Johnson",
@@ -35,19 +37,33 @@ export default function MessageList() {
 
   const [readByArr, setReadByArr] = useState([]);
 
+  const dispatch = useAppDispatch();
+
   if (loading) return <div>Loading messages...</div>;
-  if (error) return <div>{error}</div>;
+  // if (error) return <div>{error}</div>;
 
   // Handle text message sending
-  const sendTextMessage = (e) => {
+  const sendTextMessage = async (e) => {
     e.preventDefault();
-    if (socket && message.trim()) {
+    if (socket && message.trim() && selectedChat.type !== "broadcast") {
       socket.emit("sendMessage", {
         groupId: selectedChat._id,
         message: { type: "text", content: message },
         senderId: user._id,
       });
       setMessage(""); // Clear input
+    }
+
+    if (message.trim() && selectedChat.type === "broadcast") {
+      const res = await apiClient.post("/message/broadcast", {
+        groupId: selectedChat._id,
+        message: { type: "text", content: message },
+      });
+
+      dispatch(addMessage(res.data));
+      setMessage(""); // Clear input
+
+      console.log("new broadcast message:", res.data);
     }
   };
 
@@ -97,7 +113,11 @@ export default function MessageList() {
       <div className="flex-1 overflow-y-auto p-4">
         <h2 className="text-xl font-bold mb-4">
           Messages -{" "}
-          {selectedChat.type === "group" ? selectedChat.groupName : "Chat"}
+          {selectedChat.type === "group"
+            ? selectedChat.groupName
+            : selectedChat.type === "broadcast"
+            ? selectedChat.broadCastName
+            : "Chat"}
         </h2>
         <ul className="space-y-4">
           {messages.map((message) => {
@@ -155,33 +175,35 @@ export default function MessageList() {
                             )[0]?.username}
                       </p>
                       {/* TODO: group message read */}
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 rounded-full"
-                          >
-                            <MoreVertical className="h-4 w-4" />
-                            <span className="sr-only">Open menu</span>
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-56">
-                          <div className="space-y-1">
-                            <p>Read by:</p>
-                            {usersWhoRead.map(({ username, _id }) => {
-                              return (
-                                <div
-                                  key={_id}
-                                  className="px-2 py-1 text-sm hover:bg-accent hover:text-accent-foreground rounded-md cursor-pointer"
-                                >
-                                  {username}
-                                </div>
-                              );
-                            })}
-                          </div>
-                        </PopoverContent>
-                      </Popover>
+                      {message.sender === user._id && (
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 rounded-full"
+                            >
+                              <MoreVertical className="h-4 w-4" />
+                              <span className="sr-only">Open menu</span>
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-56">
+                            <div className="space-y-1">
+                              <p>Read by:</p>
+                              {usersWhoRead.map(({ username, _id }) => {
+                                return (
+                                  <div
+                                    key={_id}
+                                    className="px-2 py-1 text-sm hover:bg-accent hover:text-accent-foreground rounded-md cursor-pointer"
+                                  >
+                                    {username}
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </PopoverContent>
+                        </Popover>
+                      )}
                     </div>
                     <p>
                       {message.message.type === "text" &&
@@ -195,7 +217,10 @@ export default function MessageList() {
                       alt=""
                     />
                     <p className="text-xs text-gray-500 mt-1">
-                      {selectedChat.type !== "group" && message?.status}
+                      {/* TODO: only show status to the sender */}
+                      {selectedChat.type === "one-to-one" &&
+                        message.sender === user._id &&
+                        message?.status}
                     </p>
                   </div>
                 </div>

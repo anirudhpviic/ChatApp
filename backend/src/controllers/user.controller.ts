@@ -11,4 +11,10 @@ export class UserController {
     const userId = req.user._id as Types.ObjectId;
     return this.userService.getAllUsers(userId);
   }
+
+  @Get('/connected')
+  async getAllConnectedUsers(@Req() req) {
+    const userId = req.user._id as Types.ObjectId;
+    return this.userService.getAllConnectedUsers(userId);
+  }
 }

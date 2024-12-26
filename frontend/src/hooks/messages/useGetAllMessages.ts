@@ -22,6 +22,7 @@ const useGetAllMessages = () => {
       setError(null); // Reset previous error if any
 
       try {
+        console.log("fetching messages")
         const response = await apiClient.get("/message", {
           params: { groupId: selectedChat._id },
         });

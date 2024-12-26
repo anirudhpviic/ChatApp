@@ -10,7 +10,8 @@ interface Participant {
 // Define the shape of a chat
 interface Chat {
   groupName?: string; // Optional for one-to-one chats
-  type: "group" | "one-to-one";
+  broadCastName?: string;
+  type: "group" | "one-to-one" | "broadcast";
   participants: Participant[];
   createdAt: string;
   _id: string;

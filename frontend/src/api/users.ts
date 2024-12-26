@@ -4,4 +4,7 @@ const getAllUsers = async () => {
   return await apiClient.get("/user");
 };
 
-export { getAllUsers };
+const getAllConnectedUsers = async () => {
+  return await apiClient.get("/user/connected");
+};
+export { getAllUsers, getAllConnectedUsers };

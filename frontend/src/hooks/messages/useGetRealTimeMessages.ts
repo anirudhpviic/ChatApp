@@ -98,6 +98,25 @@ const useGetRealTimeMessages = () => {
       socket?.off("messageReadByUser", handleMessageRead);
     };
   }, [socket]);
+
+  useEffect(() => {
+    const handleBroadcastMessage = (message) => {
+      console.log("broadcast message:", message);
+      const isSenderInParticipants = selectedChat.participants.some(
+        (participant) => participant._id === message.sender
+      );
+
+      if (selectedChat.type === "one-to-one" && isSenderInParticipants) {
+        dispatch(addMessage(message));
+      }
+    };
+
+    socket?.on("broadcastMessage", handleBroadcastMessage);
+
+    return () => {
+      socket?.off("broadcastMessage", handleBroadcastMessage);
+    };
+  }, [socket]);
 };
 
 export default useGetRealTimeMessages;

@@ -42,11 +42,42 @@ export class MessageService {
       throw new NotFoundException('Group ID and User ID are required');
     }
 
-    const messages = await this.messageModel
+    let messages = await this.messageModel
       .find({ groupId })
       .sort({ createdAt: 1 });
 
     const chat = await this.chatModel.findById(groupId);
+
+    // TODO: get one to one chat with user as participant
+    // let broadcastMessages;
+
+    if (chat.type === 'one-to-one') {
+      // Step 1: Find a one-to-one chat with the exact same participants
+      const broadcastChat = await this.chatModel.findOne({
+        participants: {
+          $in: userId,
+        },
+        senderId: {
+          $in: chat.participants.filter(
+            ({ _id }) => _id !== new Types.ObjectId(userId),
+          ),
+        },
+      });
+
+      console.log('oneToOneChat', broadcastChat);
+
+      if (broadcastChat) {
+        const broadcastMessages = await this.messageModel.find({
+          groupId: broadcastChat._id.toString(),
+        });
+
+        messages = messages.concat(broadcastMessages);
+      }
+    }
+
+    // console.log('normal message:', messages);
+    // console.log('broadcast message:', broadcastMessages);
+
     if (!chat) {
       throw new NotFoundException('Chat not found');
     }
@@ -139,5 +170,41 @@ export class MessageService {
     }
     message.readBy.push(userId);
     await message.save();
+  }
+
+  async createBroadcastMessage({
+    groupId,
+    message,
+    sender,
+  }: {
+    groupId: string;
+    message: {
+      type: string;
+      content: string;
+      format?: string;
+    };
+    sender: string;
+  }) {
+    const newMessage = await this.messageModel.create({
+      sender,
+      message,
+      groupId, // here we are putting broadcast id as group id but not creating group room
+    });
+
+    const chat = await this.chatModel.findById(groupId);
+    if (!chat) {
+      throw new NotFoundException('Chat not found');
+    }
+
+    chat.participants.forEach((participant) => {
+      this.socketService
+        .getServer()
+        .to(participant.toString())
+        .emit('broadcastMessage', newMessage);
+    });
+
+    console.log('Broadcast message created:', newMessage);
+
+    return newMessage;
   }
 }

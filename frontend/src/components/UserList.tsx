@@ -18,6 +18,15 @@ export default function UserList() {
         .toUpperCase();
     }
 
+    if (chat.type === "broadcast") {
+      // Return the first letter(s) of the group name
+      return chat.broadCastName
+        ?.split(" ")
+        .map((word: string) => word[0])
+        .join("")
+        .toUpperCase();
+    }
+
     // Get the opposite user
     const oppositeUser = chat.participants.find((p) => p._id !== userId);
     const fallbackUsername = oppositeUser?.username;
@@ -44,6 +53,8 @@ export default function UserList() {
               <p className="font-medium">
                 {chat.type === "group"
                   ? chat.groupName
+                  : chat.type === "broadcast"
+                  ? chat.broadCastName
                   : chat.participants.find((p) => p._id !== userId)?.username ||
                     "?"}
               </p>

@@ -10,7 +10,13 @@ export class Chat extends Document {
   participants: Types.ObjectId[];
 
   @Prop()
-  type: 'one-to-one' | 'group';
+  type: 'one-to-one' | 'group' | 'broadcast';
+
+  @Prop({ type: Types.ObjectId, ref: 'User' })
+  senderId: Types.ObjectId;
+
+  @Prop()
+  broadCastName: string;
 
   @Prop({ default: Date.now })
   createdAt: Date;

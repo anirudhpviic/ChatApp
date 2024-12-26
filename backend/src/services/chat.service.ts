@@ -73,8 +73,18 @@ export class ChatService {
 
     // Fetch chats involving the user
     const chats = await this.chatModel
-      .find({ participants: userId })
+      .find({ participants: userId, type: { $ne: 'broadcast' } }) // Exclude broadcast
       .select('_id groupName type participants');
+
+    const broadcasts = await this.chatModel
+      .find({ senderId: userId, type: 'broadcast' })
+      .select('_id broadCastName type participants');
+
+    // console.log("broadcasts",broadcasts);
+
+    chats.push(...broadcasts);
+
+    console.log('chats', chats);
 
     // Populate participant details for each chat
     const populatedChats = await Promise.all(
@@ -86,12 +96,52 @@ export class ChatService {
         return {
           _id: chat._id,
           type: chat.type,
-          ...(chat.type === 'group' && { groupName: chat.groupName }),
+          ...(chat.type === 'group'
+            ? { groupName: chat.groupName }
+            : { broadCastName: chat.broadCastName }),
           participants: participantDetails,
         };
       }),
     );
 
     return populatedChats;
+  }
+
+  async createBroadCast({
+    broadCastName,
+    participants,
+    userId,
+  }: {
+    broadCastName: string;
+    participants: Types.ObjectId[];
+    userId: Types.ObjectId;
+  }) {
+    const chat = await this.chatModel.create({
+      broadCastName,
+      participants,
+      type: 'broadcast',
+      senderId: userId,
+    });
+
+    console.log('new broadcast:', chat);
+
+    // Fetch participant details
+    const participantDetails = await this.userModel
+      .find({ _id: { $in: participants } })
+      .select('_id username');
+
+    console.log('participant details:', {
+      _id: chat._id,
+      type: chat.type,
+      broadCastName: chat.broadCastName,
+      participants: participantDetails,
+    });
+
+    return {
+      _id: chat._id,
+      type: chat.type,
+      broadCastName: chat.broadCastName,
+      participants: participantDetails,
+    };
   }
 }

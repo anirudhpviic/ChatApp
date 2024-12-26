@@ -13,6 +13,9 @@ export const useGetAllChats = () => {
       const res = await apiClient.get("http://localhost:3000/chat", {
         params: { userId }, // Query parameters
       });
+
+      console.log("get all chats: ", res.data);
+      
       dispatch(setChats(res.data));
     } catch (error) {
       console.error("Error fetching chats:", error);

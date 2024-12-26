@@ -18,7 +18,7 @@ export class ChatController {
   ) {
     const userId = req.user._id;
     const { groupName, participants, type } = body;
-    return this.chatService.createChat({
+    return await this.chatService.createChat({
       groupName,
       participants,
       type,
@@ -28,6 +28,26 @@ export class ChatController {
 
   @Get()
   async getAllChats(@Query('userId') userId: string) {
-    return this.chatService.allChats(userId);
+    return await this.chatService.allChats(userId);
+  }
+
+  @Post('create/broadcast')
+  async createBroadcast(
+    @Body()
+    body: {
+      broadCastName: string;
+      participants: Types.ObjectId[];
+    },
+    @Req() req,
+  ) {
+    const userId = req.user._id;
+    const { broadCastName, participants } = body;
+    const res = await this.chatService.createBroadCast({
+      broadCastName,
+      participants,
+      userId,
+    });
+    console.log('res', res);
+    return res;
   }
 }

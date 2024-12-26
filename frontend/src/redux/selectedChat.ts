@@ -6,7 +6,8 @@ import { group } from "console";
 
 interface SelectedChatState {
   isSelected: boolean;
-  groupName: string;
+  groupName?: string;
+  broadCastName?: string;
   _id: string;
   participants: {
     username: string;
@@ -20,6 +21,7 @@ interface SelectedChatState {
 const initialState: SelectedChatState = {
   isSelected: false,
   groupName: "",
+  broadCastName: "",
   _id: "",
   participants: [],
   createdAt: "",
