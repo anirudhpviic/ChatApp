@@ -11,6 +11,7 @@ interface Message {
   message: { type: string; content: string; format?: string };
   groupId: string;
   status: string;
+  readBy: string[];
 }
 
 // Initial state: an array of chats
@@ -42,6 +43,26 @@ const messageSlice = createSlice({
       }
     },
 
+    updateGroupMessageSeen: (state, action) => {
+      console.log("action.payload group seen:", action.payload);
+      
+      const messageIndex = state.findIndex(
+        (m) => m._id === action.payload.messageId
+      );
+
+      if (messageIndex !== -1) {
+        // Check if the senderId already exists in the readBy array
+        const message = state[messageIndex];
+        if (!message.readBy.includes(action.payload.readerId)) {
+          // Push the senderId to the readBy array
+          state[messageIndex] = {
+            ...message,
+            readBy: [...message.readBy, action.payload.readerId],
+          };
+        }
+      }
+    },
+
     // Update an existing chat by groupName
     // updateChat: (state, action: PayloadAction<Chat>) => {
     //   const { groupName, participants, createdAt } = action.payload;
@@ -58,6 +79,6 @@ const messageSlice = createSlice({
 });
 
 // Export the actions and reducer
-export const { addMessage, clearMessages, setMessages, updateMessageSlice } =
+export const { addMessage, clearMessages, setMessages, updateMessageSlice ,updateGroupMessageSeen} =
   messageSlice.actions;
 export default messageSlice.reducer;

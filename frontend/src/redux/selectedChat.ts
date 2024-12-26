@@ -12,6 +12,7 @@ interface SelectedChatState {
     username: string;
     _id: string;
   }[];
+  type: string;
   createdAt: string;
 }
 
@@ -22,6 +23,7 @@ const initialState: SelectedChatState = {
   _id: "",
   participants: [],
   createdAt: "",
+  type: "",
 };
 
 // Create a Redux slice
