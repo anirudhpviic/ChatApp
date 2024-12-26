@@ -150,6 +150,26 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
   }
 
+  @SubscribeMessage('messageRead')
+  async handleMessageRead(
+    @MessageBody()
+    data: {
+      messageId: string;
+      userId: string;
+      senderId: string;
+    },
+  ) {
+    await this.messageService.updateMessageReady({
+      messageId: data.messageId,
+      userId: data.userId,
+    });
+
+    this.server.to(data.senderId).emit('messageReadByUser', {
+      messageId: data.messageId,
+      readerId: data.userId,
+    });
+  }
+
   @SubscribeMessage('messageSeen')
   async handleMessageSeen(
     @MessageBody() data: { groupId: string; messageId: string },

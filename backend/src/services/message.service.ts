@@ -72,6 +72,37 @@ export class MessageService {
       }
     }
 
+    // TODO: group get all set readby
+    if (chat.type === 'group') {
+      const messagesToUpdate = messages.filter(
+        (message) =>
+          message.sender.toString() !== userId &&
+          (!message.readBy || !message.readBy.includes(userId)),
+      );
+
+      if (messagesToUpdate.length > 0) {
+        await Promise.all(
+          messagesToUpdate.map(async (message) => {
+            if (!message.readBy) {
+              message.readBy = [];
+            }
+            message.readBy.push(userId);
+            await message.save();
+
+            this.socketService
+              .getServer()
+              .to(groupId)
+              .emit('messageReadByUser', {
+                messageId: message._id,
+                readerId: userId,
+              });
+          }),
+        );
+      }
+    }
+
+    console.log('All messages:', messages);
+
     return messages;
   }
 
@@ -93,5 +124,20 @@ export class MessageService {
     }
 
     return updatedMessage;
+  }
+
+  async updateMessageReady({
+    messageId,
+    userId,
+  }: {
+    messageId: string;
+    userId: string;
+  }) {
+    const message = await this.messageModel.findById(messageId);
+    if (!message) {
+      throw new NotFoundException('Message not found');
+    }
+    message.readBy.push(userId);
+    await message.save();
   }
 }

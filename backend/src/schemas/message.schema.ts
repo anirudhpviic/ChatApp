@@ -16,6 +16,9 @@ export class Message extends Document {
     format?: string; // Optional format for files (e.g., "jpg", "pdf")
   };
 
+  @Prop({ type: [{ type: String }] })
+  readBy: string[];
+
   @Prop({ type: Date, default: Date.now })
   createdAt: Date; // Automatically sets the creation date
 
