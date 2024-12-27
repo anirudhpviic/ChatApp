@@ -1,14 +1,13 @@
 import { useEffect, useState } from "react";
 import { Dialog } from "@headlessui/react";
-import { X, User } from "lucide-react";
+import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { getAllConnectedUsers, getAllUsers } from "@/api/users";
-// import { createBroadcast } from "@/api/chat"; // API to handle broadcast
+import { getAllConnectedUsers } from "@/api/users";
 import { useAppDispatch } from "@/hooks/useRedux";
 import { addChat } from "@/redux/chatSlice";
-import { createBroadCast, createChat } from "@/api/chat";
+import { createBroadCast } from "@/api/chat";
 
 export default function CreateBroadcast({ isOpen, setIsOpen }) {
   const [broadcastName, setBroadcastName] = useState("");
@@ -25,7 +24,7 @@ export default function CreateBroadcast({ isOpen, setIsOpen }) {
       try {
         const res = await getAllConnectedUsers();
         console.log("connected users: ", res.data);
-        
+
         setUsers(res.data);
       } catch (err) {
         console.error("Error fetching users:", err);
@@ -65,8 +64,7 @@ export default function CreateBroadcast({ isOpen, setIsOpen }) {
       console.log("broad resss: ", res.data);
 
       dispatch(addChat(res.data)); // Add the broadcast to the chat list if needed
-      // setIsOpen(false); // Close the dialog
-      //   console.log("broadcastData: ", broadcastData);
+      setIsOpen(false); // Close the dialog
     } catch (err) {
       console.error("Error creating broadcast:", err);
       setError("Failed to create broadcast. Please try again.");

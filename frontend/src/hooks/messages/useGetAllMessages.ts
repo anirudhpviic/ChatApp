@@ -22,11 +22,9 @@ const useGetAllMessages = () => {
       setError(null); // Reset previous error if any
 
       try {
-        console.log("fetching messages")
         const response = await apiClient.get("/message", {
           params: { groupId: selectedChat._id },
         });
-        console.log("fetch al lmessage:", response.data);
         dispatch(setMessages(response.data));
       } catch (err: any) {
         setError("Failed to load messages");

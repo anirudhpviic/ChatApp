@@ -6,8 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { getAllUsers } from "@/api/users";
 import { createChat } from "@/api/chat";
-import { useAppDispatch, useAppSelector } from "@/hooks/useRedux";
-import { addChat } from "@/redux/chatSlice";
+import { useAppSelector } from "@/hooks/useRedux";
 
 export default function CreateChat({ isOpen, setIsOpen }) {
   const [formData, setFormData] = useState({
@@ -19,7 +18,6 @@ export default function CreateChat({ isOpen, setIsOpen }) {
   const [isPending, setIsPending] = useState(false);
   const [error, setError] = useState("");
 
-  const dispatch = useAppDispatch();
   const user = useAppSelector((state) => state.user);
 
   useEffect(() => {

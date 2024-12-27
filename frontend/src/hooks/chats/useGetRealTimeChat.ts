@@ -1,5 +1,5 @@
 import { useSocketContext } from "@/context/SocketContext";
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "../useRedux";
 import { addChat } from "@/redux/chatSlice";
 
@@ -10,8 +10,6 @@ const useGetRealTimeChat = () => {
 
   useEffect(() => {
     const handleNewChat = (groupId) => {
-      console.log("joinChatRoom:", groupId);
-      // dispatch(addChat(newChat));
       socket?.emit("newRoomJoin", { groupId, userId });
     };
 
@@ -24,10 +22,6 @@ const useGetRealTimeChat = () => {
 
   useEffect(() => {
     const handleNewRoomJoined = (data) => {
-      console.log("newRoomJoined: adsf ");
-
-      console.log("newRoomJoined:", data);
-
       dispatch(addChat(data));
     };
 

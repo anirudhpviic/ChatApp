@@ -1,5 +1,5 @@
 import { useSocketContext } from "@/context/SocketContext";
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "../useRedux";
 import {
   addMessage,
@@ -16,13 +16,10 @@ const useGetRealTimeMessages = () => {
 
   useEffect(() => {
     socket?.on("receiveMessage", (message) => {
-      console.log("recievne messaage:",message);
-      
-
       if (message.groupId === selectedChat._id) {
         dispatch(addMessage(message));
 
-        // TODO: group mesaage read send
+        // group mesaage read send
         if (
           message.groupId === selectedChat._id &&
           selectedChat.type === "group" &&
@@ -52,8 +49,6 @@ const useGetRealTimeMessages = () => {
           });
         }
       }
-
-      // TODO: send message seen group opposite user
     });
 
     return () => {
@@ -63,7 +58,6 @@ const useGetRealTimeMessages = () => {
 
   useEffect(() => {
     const handleMessageDelivered = (updatedMessage) => {
-      console.log("mesage delivered check 3", updatedMessage);
       dispatch(updateMessageSlice(updatedMessage));
     };
 
@@ -76,7 +70,6 @@ const useGetRealTimeMessages = () => {
 
   useEffect(() => {
     const handleMessageSeen = (updatedMessage) => {
-      console.log("message seen check 4", updatedMessage);
       dispatch(updateMessageSlice(updatedMessage));
     };
 
@@ -89,7 +82,6 @@ const useGetRealTimeMessages = () => {
 
   useEffect(() => {
     const handleMessageRead = ({ messageId, readerId }) => {
-      console.log("groupd message :", messageId, "reader:", readerId);
       dispatch(updateGroupMessageSeen({ messageId, readerId }));
     };
     socket?.on("messageReadByUser", handleMessageRead);
@@ -101,7 +93,6 @@ const useGetRealTimeMessages = () => {
 
   useEffect(() => {
     const handleBroadcastMessage = (message) => {
-      console.log("broadcast message:", message);
       const isSenderInParticipants = selectedChat.participants.some(
         (participant) => participant._id === message.sender
       );

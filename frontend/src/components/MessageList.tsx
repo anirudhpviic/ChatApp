@@ -4,8 +4,8 @@ import { Input } from "@/components/ui/input";
 import { useSocketContext } from "@/context/SocketContext";
 import useGetAllMessages from "@/hooks/messages/useGetAllMessages";
 import { useAppDispatch, useAppSelector } from "@/hooks/useRedux";
-import { Send, Image as ImageIcon, Mic, Mic2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Send, Image as ImageIcon, Mic2 } from "lucide-react";
+import { useState } from "react";
 
 import { MoreVertical } from "lucide-react";
 import {
@@ -16,31 +16,20 @@ import {
 import { apiClient } from "@/api/config";
 import { addMessage } from "@/redux/messageSlice";
 
-const names = [
-  "Alice Johnson",
-  "Bob Smith",
-  "Charlie Brown",
-  "Diana Ross",
-  "Ethan Hunt",
-];
-
 export default function MessageList() {
   const { socket } = useSocketContext();
   const [message, setMessage] = useState("");
   const [file, setFile] = useState(null);
 
-  const { loading, error } = useGetAllMessages();
+  const { loading } = useGetAllMessages();
 
   const selectedChat = useAppSelector((state) => state.selectedChat);
   const messages = useAppSelector((state) => state.message);
   const user = useAppSelector((state) => state.user);
 
-  const [readByArr, setReadByArr] = useState([]);
-
   const dispatch = useAppDispatch();
 
   if (loading) return <div>Loading messages...</div>;
-  // if (error) return <div>{error}</div>;
 
   // Handle text message sending
   const sendTextMessage = async (e) => {
@@ -109,13 +98,9 @@ export default function MessageList() {
   };
 
   const handleUsesWhoRead = (message) => {
-    console.log("message: ", message);
-    const readBy = selectedChat.participants.filter((user) =>
+    return selectedChat.participants.filter((user) =>
       message.readBy.includes(user._id)
     );
-
-    console.log("readBy: ", readBy);
-    return readBy;
   };
 
   return (
@@ -178,7 +163,7 @@ export default function MessageList() {
                               (p) => p._id === message.sender
                             )[0]?.username}
                       </p>
-                      {/* TODO: group message read */}
+                      {/* group message read */}
                       {message.sender === user._id &&
                         selectedChat.type === "group" && (
                           <Popover>
@@ -224,18 +209,15 @@ export default function MessageList() {
                       alt=""
                     />
                     <p className="text-xs text-gray-500 mt-1">
-                      {/* TODO: only show status to the sender */}
+                      {/* only show status to the sender */}
                       {selectedChat.type === "one-to-one" &&
                         message.sender === user._id &&
                         message?.status}
                     </p>
-                    {/* TODO: just did this for broadcast not good */}
-                    {selectedChat._id !== message.groupId &&
-                      // message.sender === user._id 
-                      // && 
-                      (
-                      <Mic2 className="h-4 w-4"/>
-                      )}
+                    {/* just did this for broadcast not good */}
+                    {selectedChat._id !== message.groupId && (
+                      <Mic2 className="h-4 w-4" />
+                    )}
                   </div>
                 </div>
               </li>
@@ -269,7 +251,9 @@ export default function MessageList() {
         {/* {file && ( */}
         <div className="mt-2 flex items-center space-x-2">
           <p className="text-sm text-gray-500">Selected file: {file?.name}</p>
-          <Button onClick={sendFileMessage}>Send File</Button>
+          {selectedChat.type !== "broadcast" && (
+            <Button onClick={sendFileMessage}>Send File</Button>
+          )}
         </div>
         {/* )} */}
       </div>

@@ -1,10 +1,5 @@
 import SignUpPage from "./pages/Signup";
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  useNavigate,
-} from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
 import { useGetAllChats } from "./hooks/chats/useGetAllChats";
@@ -35,9 +30,7 @@ function App() {
   useGetRealTimeChat();
   useGetRealTimeMessages();
 
-  const { accessToken, refreshToken, role } = useAppSelector(
-    (state) => state.user
-  );
+  const { accessToken, refreshToken } = useAppSelector((state) => state.user);
 
   const dispatch = useAppDispatch();
 
@@ -61,9 +54,6 @@ function App() {
               refreshToken, // Assume you store the refresh token in the user state
             }
           );
-
-          // TODO: check later
-          console.log("Refresh token response:", response.data);
 
           // Update access token in the Redux store
           dispatch(

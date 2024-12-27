@@ -10,8 +10,6 @@ if (root) {
 
   const accessToken = JSON.parse(user)?.accessToken;
 
-  console.log("token:", accessToken);
-
   // Extract the token from the user object
   token = accessToken;
 }
@@ -26,7 +24,5 @@ const apiClient = axios.create({
 if (token) {
   apiClient.defaults.headers.common["Authorization"] = `Bearer ${token}`;
 }
-
-console.log(apiClient);
 
 export { apiClient };

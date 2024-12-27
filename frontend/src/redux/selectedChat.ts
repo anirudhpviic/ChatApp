@@ -1,8 +1,4 @@
-// src/features/user/userSlice.ts
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { group } from "console";
-
-// Define the shape of the user state
 
 interface SelectedChatState {
   isSelected: boolean;
@@ -34,18 +30,10 @@ const userSlice = createSlice({
   initialState,
   reducers: {
     setSelectedChat: (state, action: PayloadAction<SelectedChatState>) => {
-      console.log("action.payload", action.payload);
-      // const { groupName, participants, createdAt, _id } = action.payload;
-      // state.isSelected = true;
-      // state.groupName = groupName;
-      // state.participants = participants;
-      // state.createdAt = createdAt;
-      // state._id = _id;
-
       return (state = { ...action.payload });
     },
 
-    clearSelectedChat: () => initialState, // Resets to initial state
+    clearSelectedChat: () => initialState,
   },
 });
 

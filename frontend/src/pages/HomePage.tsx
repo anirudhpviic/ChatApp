@@ -46,7 +46,7 @@ const HomePage = () => {
     <div className="flex h-screen">
       {/* Sidebar */}
       <div className="w-1/4 border-r p-4 space-y-4">
-      <h2>{user.username}</h2>
+        <h2>{user.username}</h2>
         <Button onClick={handleOpenCreatePage} className="w-full">
           Create Chat
         </Button>
@@ -57,11 +57,11 @@ const HomePage = () => {
         <Button onClick={handleLogout} className="w-full">
           Logout
         </Button>
-        {/* User List */}
+        {/* Chat List */}
         <UserList />
       </div>
 
-      {/* Main Chat Area */}
+      {/* Message Area */}
       <div className="flex-1">
         <MessageList />
       </div>
@@ -70,6 +70,7 @@ const HomePage = () => {
       {isOpen && (
         <CreateChat isOpen={isOpen} setIsOpen={handleCloseCreatePage} />
       )}
+      {/* Create Broadcast Modal */}
       {isOpenBroadCastCreate && (
         <CreateBroadCast
           isOpen={isOpenBroadCastCreate}

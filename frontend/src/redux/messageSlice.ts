@@ -1,9 +1,5 @@
-// src/features/chat/chatSlice.ts
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createSlice } from "@reduxjs/toolkit";
 
-// Define the shape of a participant
-
-// Define the shape of a chat
 interface Message {
   createdAt: string;
   _id: string;
@@ -24,18 +20,15 @@ const messageSlice = createSlice({
   reducers: {
     // Add a new chat to the array
     addMessage: (state, action) => {
-      // console.log("action.payload", action.payload);
-      // state =   [...state, action.payload];
-      state.push(action.payload); // Correctly updates state
+      state.push(action.payload);
     },
 
+    // Replace the entire state with new chats
     setMessages: (state, action) => {
       return (state = [...action.payload]);
     },
 
     updateMessageSlice: (state, action) => {
-      console.log("action.payload", action.payload);
-
       const messageIndex = state.findIndex((m) => m._id === action.payload._id);
       if (messageIndex !== -1) {
         // Replace the message at the found index
@@ -44,8 +37,6 @@ const messageSlice = createSlice({
     },
 
     updateGroupMessageSeen: (state, action) => {
-      console.log("action.payload group seen:", action.payload);
-      
       const messageIndex = state.findIndex(
         (m) => m._id === action.payload.messageId
       );
@@ -63,22 +54,16 @@ const messageSlice = createSlice({
       }
     },
 
-    // Update an existing chat by groupName
-    // updateChat: (state, action: PayloadAction<Chat>) => {
-    //   const { groupName, participants, createdAt } = action.payload;
-    //   const chatIndex = state.chats.findIndex(chat => chat.groupName === groupName);
-
-    //   if (chatIndex !== -1) {
-    //     state.chats[chatIndex] = { groupName, participants, createdAt };
-    //   }
-    // },
-
-    // Clear all chats
     clearMessages: () => initialState,
   },
 });
 
 // Export the actions and reducer
-export const { addMessage, clearMessages, setMessages, updateMessageSlice ,updateGroupMessageSeen} =
-  messageSlice.actions;
+export const {
+  addMessage,
+  clearMessages,
+  setMessages,
+  updateMessageSlice,
+  updateGroupMessageSeen,
+} = messageSlice.actions;
 export default messageSlice.reducer;
