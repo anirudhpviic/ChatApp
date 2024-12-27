@@ -46,8 +46,7 @@ const HomePage = () => {
     <div className="flex h-screen">
       {/* Sidebar */}
       <div className="w-1/4 border-r p-4 space-y-4">
-        <h2>{user.username}</h2>
-
+      <h2>{user.username}</h2>
         <Button onClick={handleOpenCreatePage} className="w-full">
           Create Chat
         </Button>

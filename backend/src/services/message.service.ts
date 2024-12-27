@@ -45,7 +45,7 @@ export class MessageService {
 
     // get broadcast messages
     if (chat.type === 'one-to-one') {
-      // Step 1: Find a one-to-one chat with the exact same participants
+      // Find broadcast chat with user as participant and other one-to-one participant as sender
       const broadcastChat = await this.chatModel.findOne({
         participants: {
           $in: userId,

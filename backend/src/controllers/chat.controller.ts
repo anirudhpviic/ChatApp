@@ -14,15 +14,12 @@ export class ChatController {
       participants: Types.ObjectId[];
       type: 'one-to-one' | 'group';
     },
-    @Req() req,
   ) {
-    const userId = req.user._id;
     const { groupName, participants, type } = body;
     return await this.chatService.createChat({
       groupName,
       participants,
       type,
-      userId,
     });
   }
 
