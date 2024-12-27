@@ -20,10 +20,10 @@ export class Message extends Document {
   readBy: string[];
 
   @Prop({ type: Date, default: Date.now })
-  createdAt: Date; // Automatically sets the creation date
+  createdAt: Date;
 
   @Prop({ type: String })
-  status: string; // Message status
+  status: string;
 
   @Prop({ type: Types.ObjectId, ref: 'Chat', required: true })
   groupId: Types.ObjectId; // Reference to the Chat model

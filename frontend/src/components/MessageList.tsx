@@ -175,7 +175,7 @@ export default function MessageList() {
                             )[0]?.username}
                       </p>
                       {/* TODO: group message read */}
-                      {message.sender === user._id && (
+                      {message.sender === user._id && selectedChat.type === "group" && (
                         <Popover>
                           <PopoverTrigger asChild>
                             <Button

@@ -59,7 +59,7 @@ const useGetRealTimeMessages = () => {
     return () => {
       socket?.off("receiveMessage");
     };
-  }, [socket, dispatch, selectedChat._id]);
+  }, [socket, dispatch, selectedChat._id, selectedChat.type, user._id]);
 
   useEffect(() => {
     const handleMessageDelivered = (updatedMessage) => {

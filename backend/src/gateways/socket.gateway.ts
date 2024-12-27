@@ -69,6 +69,10 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
       this.socket.join(groupId);
 
+      console.log(
+        `create chat Socket ${this.socket.id} joined room ${groupId}`,
+      );
+
       // Fetch participant details
       const participantDetails = await this.userModel
         .find({ _id: { $in: chat.participants } })
@@ -159,7 +163,7 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
       senderId: string;
     },
   ) {
-    await this.messageService.updateMessageReady({
+    await this.messageService.updateMessageReadBy({
       messageId: data.messageId,
       userId: data.userId,
     });

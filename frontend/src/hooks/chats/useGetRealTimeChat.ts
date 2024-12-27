@@ -36,7 +36,7 @@ const useGetRealTimeChat = () => {
     return () => {
       socket?.off("newRoomJoined", handleNewRoomJoined);
     };
-  }, [socket]);
+  }, [dispatch, socket]);
 };
 
 export default useGetRealTimeChat;

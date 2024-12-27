@@ -28,29 +28,22 @@ export class MessageService {
     groupId: string;
     status: string;
   }) {
-    const newMessage = await this.messageModel.create({
+    return await this.messageModel.create({
       sender,
       message,
       groupId,
       status,
     });
-    return newMessage;
   }
 
   async getAllMessages(groupId: string, userId: string) {
-    if (!groupId || !userId) {
-      throw new NotFoundException('Group ID and User ID are required');
-    }
-
     let messages = await this.messageModel
       .find({ groupId })
       .sort({ createdAt: 1 });
 
     const chat = await this.chatModel.findById(groupId);
 
-    // TODO: get one to one chat with user as participant
-    // let broadcastMessages;
-
+    // get broadcast messages
     if (chat.type === 'one-to-one') {
       // Step 1: Find a one-to-one chat with the exact same participants
       const broadcastChat = await this.chatModel.findOne({
@@ -64,8 +57,6 @@ export class MessageService {
         },
       });
 
-      console.log('oneToOneChat', broadcastChat);
-
       if (broadcastChat) {
         const broadcastMessages = await this.messageModel.find({
           groupId: broadcastChat._id.toString(),
@@ -75,13 +66,11 @@ export class MessageService {
       }
     }
 
-    // console.log('normal message:', messages);
-    // console.log('broadcast message:', broadcastMessages);
-
     if (!chat) {
       throw new NotFoundException('Chat not found');
     }
 
+    // update status to seen
     if (chat.type === 'one-to-one') {
       const unseenMessages = messages.filter(
         (message) =>
@@ -103,7 +92,7 @@ export class MessageService {
       }
     }
 
-    // TODO: group get all set readby
+    // update status to read
     if (chat.type === 'group') {
       const messagesToUpdate = messages.filter(
         (message) =>
@@ -132,8 +121,6 @@ export class MessageService {
       }
     }
 
-    console.log('All messages:', messages);
-
     return messages;
   }
 
@@ -157,7 +144,7 @@ export class MessageService {
     return updatedMessage;
   }
 
-  async updateMessageReady({
+  async updateMessageReadBy({
     messageId,
     userId,
   }: {
@@ -202,8 +189,6 @@ export class MessageService {
         .to(participant.toString())
         .emit('broadcastMessage', newMessage);
     });
-
-    console.log('Broadcast message created:', newMessage);
 
     return newMessage;
   }

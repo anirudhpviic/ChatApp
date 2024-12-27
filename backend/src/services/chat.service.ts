@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Chat } from 'src/schemas/chat.schema';
@@ -24,19 +24,6 @@ export class ChatService {
     type: 'one-to-one' | 'group';
     userId: Types.ObjectId;
   }) {
-    // Validate inputs
-    if (!participants || participants.length < 1) {
-      throw new BadRequestException('Participants array must not be empty');
-    }
-    if (type === 'group' && !groupName) {
-      throw new BadRequestException('Group name is required for group chats');
-    }
-    if (type === 'one-to-one' && participants.length !== 2) {
-      throw new BadRequestException(
-        'One-to-one chats must have exactly 2 participants',
-      );
-    }
-
     // Prepare chat data
     const chatData: Partial<Chat> = { type, participants };
     if (type === 'group') chatData.groupName = groupName;
@@ -67,24 +54,17 @@ export class ChatService {
   }
 
   async allChats(userId: string) {
-    if (!userId) {
-      throw new BadRequestException('User ID is required');
-    }
-
     // Fetch chats involving the user
     const chats = await this.chatModel
       .find({ participants: userId, type: { $ne: 'broadcast' } }) // Exclude broadcast
       .select('_id groupName type participants');
 
+    // Fetch broadcasts involving the user as sender
     const broadcasts = await this.chatModel
       .find({ senderId: userId, type: 'broadcast' })
       .select('_id broadCastName type participants');
 
-    // console.log("broadcasts",broadcasts);
-
     chats.push(...broadcasts);
-
-    console.log('chats', chats);
 
     // Populate participant details for each chat
     const populatedChats = await Promise.all(
@@ -123,19 +103,10 @@ export class ChatService {
       senderId: userId,
     });
 
-    console.log('new broadcast:', chat);
-
     // Fetch participant details
     const participantDetails = await this.userModel
       .find({ _id: { $in: participants } })
       .select('_id username');
-
-    console.log('participant details:', {
-      _id: chat._id,
-      type: chat.type,
-      broadCastName: chat.broadCastName,
-      participants: participantDetails,
-    });
 
     return {
       _id: chat._id,

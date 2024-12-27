@@ -24,6 +24,8 @@ export default function CreateBroadcast({ isOpen, setIsOpen }) {
     const fetchUsers = async () => {
       try {
         const res = await getAllConnectedUsers();
+        console.log("connected users: ", res.data);
+        
         setUsers(res.data);
       } catch (err) {
         console.error("Error fetching users:", err);

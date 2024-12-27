@@ -42,12 +42,10 @@ export class ChatController {
   ) {
     const userId = req.user._id;
     const { broadCastName, participants } = body;
-    const res = await this.chatService.createBroadCast({
+    return await this.chatService.createBroadCast({
       broadCastName,
       participants,
       userId,
     });
-    console.log('res', res);
-    return res;
   }
 }

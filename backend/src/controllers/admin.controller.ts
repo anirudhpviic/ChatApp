@@ -10,6 +10,5 @@ export class AdminController {
   @UseGuards(new RolesGuard('admin')) // Require 'admin' role for this route
   async getChatDetails() {
     return await this.adminService.getChatDetails();
-    // return res;
   }
 }

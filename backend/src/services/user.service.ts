@@ -34,36 +34,25 @@ export class UserService {
 
   async getAllConnectedUsers(userId: Types.ObjectId) {
     try {
-      console.log("here 1");
-      
       // Step 1: Find one-to-one chats involving the user
       const chats = await this.chatModel.find({
         type: 'one-to-one',
         participants: userId,
       });
 
-      console.log("here 2",chats);
-      
-
       // Step 2: Extract the other user's IDs
       const otherUserIds = chats
         .map((chat) => chat.participants.find((id) => id !== userId)) // Find the other user in participants
         .filter((id) => id); // Filter out null values (in case of missing participants)
-
-
-      console.log("here 3",otherUserIds);
 
       if (otherUserIds.length === 0) {
         return []; // No connected users
       }
 
       // Step 3: Fetch usernames from the User model
-      const connectedUsers = await this.userModel
+      return await this.userModel
         .find({ _id: { $in: otherUserIds } })
         .select('_id username'); // Select only the _id and username fields
-
-      // Step 4: Return the connected users
-      return connectedUsers;
     } catch (error) {
       console.error('Error fetching users:', error.message);
       throw new InternalServerErrorException('Failed to fetch users');
