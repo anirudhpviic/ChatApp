@@ -16,9 +16,9 @@ const useGetRealTimeMessages = () => {
 
   useEffect(() => {
     socket?.on("receiveMessage", (message) => {
-      console.log("chat.id", selectedChat._id);
+      console.log("recievne messaage:",message);
+      
 
-      console.log("real time message", message);
       if (message.groupId === selectedChat._id) {
         dispatch(addMessage(message));
 

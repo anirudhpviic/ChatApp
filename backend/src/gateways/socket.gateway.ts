@@ -5,13 +5,14 @@ import {
   OnGatewayDisconnect,
   SubscribeMessage,
   MessageBody,
+  ConnectedSocket,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { MessageService } from 'src/services/message.service';
 import { SocketService } from 'src/services/socket.service';
 import { CloudinaryService } from 'src/services/cloudinary.service';
 import { Chat } from 'src/schemas/chat.schema';
-import { Model } from 'mongoose';
+import { connect, Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { User } from 'src/schemas/user.schema';
 
@@ -29,7 +30,7 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @InjectModel(User.name) private readonly userModel: Model<User>,
   ) {}
 
-  private socket;
+  // private socket;
   async handleConnection(socket: Socket) {
     console.log(`Client connected: ${socket.id}`);
     const userId = socket.handshake.query.userId as string;
@@ -37,6 +38,8 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
     try {
       // Associate the socket with the user in the service
       this.socketService.setServer(this.server);
+      this.socketService.setSocket(socket);
+      // TODO: remove setsocket
 
       socket.join(userId);
 
@@ -47,7 +50,7 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
         console.log(`Socket ${socket.id} joined room ${groupId}`);
       });
 
-      this.socket = socket;
+      // this.socket = socket;
     } catch (error) {
       console.error('Error handling connection:', error.message);
       socket.disconnect();
@@ -61,17 +64,27 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('newRoomJoin')
   async handleJoinNewChat(
     @MessageBody() data: { groupId: string; userId: string },
+    @ConnectedSocket() client: Socket, // Injects the correct socket instance for the current client
   ) {
     const { groupId, userId } = data;
+    // const socket = this.server.sockets.sockets.get(userId.toString());
 
     try {
       const chat = await this.chatModel.findById(groupId);
 
-      this.socket.join(groupId);
+      client.join(groupId.toString());
+      console.log('current socket:', client.id);
 
-      console.log(
-        `create chat Socket ${this.socket.id} joined room ${groupId}`,
-      );
+      // console.log("here")
+      // // client.join(groupId.toString());
+      // try {
+      //   console.log("client:",client)
+      //   client.join(groupId.toString())
+      // } catch (error) {
+      //   console.log(error)
+      // }
+
+      // console.log(`Socket ${client.id} joined room ${groupId}`);
 
       // Fetch participant details
       const participantDetails = await this.userModel
@@ -88,6 +101,36 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
       console.error('Error joining room:', error.message);
     }
   }
+
+  // @SubscribeMessage('newRoomJoin')
+  // async handleJoinNewChat(
+  //   @MessageBody() data: { groupId: string; userId: string },
+  // ) {
+  //   const { groupId, userId } = data;
+  //   const socket = this.server.sockets.sockets.get(userId);
+  //   if (!socket) {
+  //     console.error('Socket not found for user:', userId);
+  //     return;
+  //   }
+
+  //   try {
+  //     const chat = await this.chatModel.findById(groupId);
+  //     socket.join(groupId);
+
+  //     const participantDetails = await this.userModel
+  //       .find({ _id: { $in: chat.participants } })
+  //       .select('_id username');
+
+  //     this.server.to(userId).emit('newRoomJoined', {
+  //       _id: chat._id,
+  //       type: chat.type,
+  //       ...(chat.type === 'group' && { groupName: chat.groupName }),
+  //       participants: participantDetails,
+  //     });
+  //   } catch (error) {
+  //     console.error('Error joining room:', error.message);
+  //   }
+  // }
 
   @SubscribeMessage('sendMessage')
   async handleMessage(

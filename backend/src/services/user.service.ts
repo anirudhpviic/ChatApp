@@ -13,19 +13,12 @@ export class UserService {
 
   async getAllUsers(userId: Types.ObjectId) {
     try {
-      return await this.userModel.aggregate([
-        {
-          $match: {
-            _id: { $ne: userId }, // Exclude the user with the given userId
-          },
-        },
-        {
-          $project: {
-            _id: 1,
-            username: 1, // Include only _id and username
-          },
-        },
-      ]);
+      const users = await this.userModel
+        .find({ _id: { $ne: userId } }) // Exclude the user with the given userId
+        .select('_id username'); // Include only _id and username
+
+      console.log('all uses:', users);
+      return users;
     } catch (error) {
       console.error('Error fetching users:', error.message);
       throw new InternalServerErrorException('Failed to fetch users');

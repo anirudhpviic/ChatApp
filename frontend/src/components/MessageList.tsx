@@ -108,6 +108,12 @@ export default function MessageList() {
     }
   };
 
+  const handleUsesWhoRead = (message) => {
+    return selectedChat.participants.filter((user) =>
+      message.readBy.includes(user._id)
+    );
+  };
+
   return (
     <div className="flex flex-col h-full">
       <div className="flex-1 overflow-y-auto p-4">
@@ -121,13 +127,6 @@ export default function MessageList() {
         </h2>
         <ul className="space-y-4">
           {messages.map((message) => {
-            // Find users who read the message
-            const usersWhoRead = selectedChat.participants.filter((user) =>
-              message.readBy.includes(user._id)
-            );
-
-            console.log("usersWhoRead", usersWhoRead);
-
             return (
               <li
                 key={message._id}
@@ -175,35 +174,38 @@ export default function MessageList() {
                             )[0]?.username}
                       </p>
                       {/* TODO: group message read */}
-                      {message.sender === user._id && selectedChat.type === "group" && (
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8 rounded-full"
-                            >
-                              <MoreVertical className="h-4 w-4" />
-                              <span className="sr-only">Open menu</span>
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-56">
-                            <div className="space-y-1">
-                              <p>Read by:</p>
-                              {usersWhoRead.map(({ username, _id }) => {
-                                return (
-                                  <div
-                                    key={_id}
-                                    className="px-2 py-1 text-sm hover:bg-accent hover:text-accent-foreground rounded-md cursor-pointer"
-                                  >
-                                    {username}
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          </PopoverContent>
-                        </Popover>
-                      )}
+                      {message.sender === user._id &&
+                        selectedChat.type === "group" && (
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 rounded-full"
+                              >
+                                <MoreVertical className="h-4 w-4" />
+                                <span className="sr-only">Open menu</span>
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-56">
+                              <div className="space-y-1">
+                                <p>Read by:</p>
+                                {handleUsesWhoRead(message).map(
+                                  ({ username, _id }) => {
+                                    return (
+                                      <div
+                                        key={_id}
+                                        className="px-2 py-1 text-sm hover:bg-accent hover:text-accent-foreground rounded-md cursor-pointer"
+                                      >
+                                        {username}
+                                      </div>
+                                    );
+                                  }
+                                )}
+                              </div>
+                            </PopoverContent>
+                          </Popover>
+                        )}
                     </div>
                     <p>
                       {message.message.type === "text" &&

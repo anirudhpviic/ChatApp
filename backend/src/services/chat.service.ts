@@ -36,15 +36,21 @@ export class ChatService {
       .find({ _id: { $in: participants } })
       .select('_id username');
 
+    // TODO: Need tothe sender not joinging the chat room
+
+    // this.socketService.getSocket().join(chat._id.toString());
+    console.log("pari:",participants)
+
     // Join the chat room for each participant
     participants.forEach((participantId) => {
-      if (participantId === userId) return;
+      // if (participantId === userId) return;
       this.socketService
         .getServer()
         .to(participantId.toString())
         .emit('joinChatRoom', chat._id.toString());
     });
 
+    // TODO: remove later
     return {
       _id: chat._id,
       type: chat.type,
