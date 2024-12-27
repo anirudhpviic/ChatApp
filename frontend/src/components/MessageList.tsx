@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { useSocketContext } from "@/context/SocketContext";
 import useGetAllMessages from "@/hooks/messages/useGetAllMessages";
 import { useAppDispatch, useAppSelector } from "@/hooks/useRedux";
-import { Send, Image as ImageIcon } from "lucide-react";
+import { Send, Image as ImageIcon, Mic, Mic2 } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { MoreVertical } from "lucide-react";
@@ -109,9 +109,13 @@ export default function MessageList() {
   };
 
   const handleUsesWhoRead = (message) => {
-    return selectedChat.participants.filter((user) =>
+    console.log("message: ", message);
+    const readBy = selectedChat.participants.filter((user) =>
       message.readBy.includes(user._id)
     );
+
+    console.log("readBy: ", readBy);
+    return readBy;
   };
 
   return (
@@ -123,7 +127,8 @@ export default function MessageList() {
             ? selectedChat.groupName
             : selectedChat.type === "broadcast"
             ? selectedChat.broadCastName
-            : "Chat"}
+            : selectedChat.participants.filter((p) => p._id !== user._id)[0]
+                ?.username}
         </h2>
         <ul className="space-y-4">
           {messages.map((message) => {
@@ -224,6 +229,13 @@ export default function MessageList() {
                         message.sender === user._id &&
                         message?.status}
                     </p>
+                    {/* TODO: just did this for broadcast not good */}
+                    {selectedChat._id !== message.groupId &&
+                      // message.sender === user._id 
+                      // && 
+                      (
+                      <Mic2 className="h-4 w-4"/>
+                      )}
                   </div>
                 </div>
               </li>

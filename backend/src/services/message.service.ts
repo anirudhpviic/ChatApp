@@ -111,7 +111,7 @@ export class MessageService {
 
             this.socketService
               .getServer()
-              .to(groupId)
+              .to(message.sender.toString())
               .emit('messageReadByUser', {
                 messageId: message._id,
                 readerId: userId,

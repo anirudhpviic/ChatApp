@@ -28,6 +28,24 @@ export class ChatService {
     const chatData: Partial<Chat> = { type, participants };
     if (type === 'group') chatData.groupName = groupName;
 
+    // Check for duplicate one-to-one chat
+    if (type === 'one-to-one') {
+      // Ensure only two participants are allowed in a one-to-one chat
+      if (participants.length !== 2) {
+        throw new Error('One-to-one chats must have exactly two participants.');
+      }
+
+      // Find a chat with the same participants
+      const duplicateChat = await this.chatModel.findOne({
+        type: 'one-to-one',
+        participants: { $all: participants, $size: 2 }, // Check both participants regardless of order
+      });
+
+      if (duplicateChat) {
+        throw new Error('Duplicate one-to-one chat already exists.');
+      }
+    }
+
     // Create the chat
     const chat = await this.chatModel.create(chatData);
 
@@ -39,7 +57,7 @@ export class ChatService {
     // TODO: Need tothe sender not joinging the chat room
 
     // this.socketService.getSocket().join(chat._id.toString());
-    console.log("pari:",participants)
+    console.log('pari:', participants);
 
     // Join the chat room for each participant
     participants.forEach((participantId) => {

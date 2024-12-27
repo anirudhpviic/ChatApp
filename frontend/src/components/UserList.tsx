@@ -38,7 +38,6 @@ export default function UserList() {
   return (
     <div className="p-4">
       <h2 className="text-xl font-bold mb-4">Chats</h2>
-      <p>{username}</p>
       <ul className="space-y-2">
         {chats.map((chat) => (
           <li

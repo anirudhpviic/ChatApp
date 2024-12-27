@@ -3,7 +3,7 @@ import CreateChat from "@/components/CreateChat";
 import MessageList from "@/components/MessageList";
 import { Button } from "@/components/ui/button";
 import UserList from "@/components/UserList";
-import { useAppDispatch } from "@/hooks/useRedux";
+import { useAppDispatch, useAppSelector } from "@/hooks/useRedux";
 import { clearChats } from "@/redux/chatSlice";
 import { clearMessages } from "@/redux/messageSlice";
 import { clearSelectedChat } from "@/redux/selectedChat";
@@ -14,6 +14,7 @@ import { useNavigate } from "react-router-dom";
 const HomePage = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isOpenBroadCastCreate, setIsOpenBroadCastCreate] = useState(false);
+  const user = useAppSelector((state) => state.user);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
@@ -45,6 +46,8 @@ const HomePage = () => {
     <div className="flex h-screen">
       {/* Sidebar */}
       <div className="w-1/4 border-r p-4 space-y-4">
+        <h2>{user.username}</h2>
+
         <Button onClick={handleOpenCreatePage} className="w-full">
           Create Chat
         </Button>
